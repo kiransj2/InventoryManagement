@@ -1,0 +1,14 @@
+{
+  "name": "InventoryManagement",
+  "version": "0.0.0",
+  "description": "InventoryManagement",
+  "main": "app.js",
+  "author": {
+    "name": "Kiran S J",
+    "email": "kiransj@outlook.com"
+  },
+  "dependencies": {
+    "express": "^4.12.3",
+    "sqlite3": "^3.0.7"
+  }
+}
