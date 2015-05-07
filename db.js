@@ -1,11 +1,24 @@
 ﻿"use strict";
 
 var fs = require("fs"),
-    sqlite3 = require("sqlite3").verbose();
+    sqlite3 = require("sqlite3").verbose(),
+    util = require('util'); 
 
 // Global Variables
 var db;
 var repository = "./mydb.db";
+
+// time_now function is used to get the cur_time 
+function date_now() {
+    var date = new Date();
+    var str = util.format("%d-%d-%d %d-%d-%d", date.getFullYear(), date.getMonth()+1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds());
+    return str;
+}
+
+function build_date(year, month, day) {
+    var str = util.format("%d-%d-%d", year, month, day);
+    return str;
+}
 
 function db_open() {
     if (typeof db === 'undefined') {
@@ -35,6 +48,7 @@ function db_status() {
 }
 
 function db_execute_query(query, callback) {
+    //Log the query being Executed here
     db.all(query, callback);
     return;
 }
@@ -65,25 +79,16 @@ function db_create_table(query, callback) {
 module.exports = {
     db_init: db_open,
     db_exit: db_close,
+    db_new_table: db_create_table,
+    db_date_now: time_now,
+    db_date: build_date
 };
 
-if (!db_open()) {
-    console.error("Unable to open database file");
-    process.exit(1);
-}
 
-var stmt =  "CREATE TABLE Items( " + 
-            "id integer PRIMARY KEY autoincrement, " +
-            "name varchar(255) NOT NULL," +
-            "dt datetime NOT NULL default (datetime('now'))," +
-            "UNIQUE (name));";
-
-db_create_table(stmt, function (err) {
-    if (err) {
-        console.error("Error creating table");
-        return;
+if(0) {
+    if (!db_open()) {
+        console.error("Unable to open database file");
+        process.exit(1);
     }
-    console.log("Created table");
-});
-
-db_close();
+    db_close();
+}
