@@ -56,6 +56,7 @@ function db_execute_query(query, callback) {
 function db_create_table(query, callback) {
     if(!db_status()) {
         console.error("trying to create table without opening database");
+        callbak(true);
         return false;
     }
     db_execute_query(query, function (err, rows) {
@@ -76,12 +77,23 @@ function db_create_table(query, callback) {
     });
 }
 
+function db_execute(query, callback) {
+    if (!db_status()) {
+        console.error("trying to create table without opening database");
+        callbak(true, "db not initialized yet");
+        return;
+    }
+    db_execute_query(query, callback);
+    return;
+}
+
 module.exports = {
     db_init: db_open,
     db_exit: db_close,
     db_new_table: db_create_table,
-    db_date_now: time_now,
-    db_date: build_date
+    db_date_now: date_now,
+    db_date: build_date,
+    db_execute_query: db_execute
 };
 
 
