@@ -22,6 +22,12 @@
                 });                
             }
 
+            function list_incoming_stocks() {
+                db_get_incoming_stocks_ui(function (table) {
+                    set_data_section(table);
+                });
+            }
+
             function add_incoming_stock() {
                 db_get_all_items(function (err, obj) {
                     if (err) {
@@ -54,7 +60,7 @@
     <div id="navigation">
         <a onclick="list_all_items()" href="javascript:void(0);">Item List</a><br>
         <a onclick="jsfunction('cur_stocks')" href="javascript:void(0);">Current Stocks</a><br>
-        <a onclick="jsfunction('incoming_stocks')" href="javascript:void(0);">Incoming Stocks</a><br>
+        <a onclick="list_incoming_stocks()" href="javascript:void(0);">Incoming Stocks</a><br>
         <a onclick="jsfunction('outgoing_stocks')" href="javascript:void(0);">outgoing_stocks</a><br>
         <a onclick="jsfunction('opening_stocks')" href="javascript:void(0);">Opening Stocks</a><br>
         <hr />

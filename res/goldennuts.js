@@ -82,3 +82,36 @@ function db_add_stock(name, quantity, callback) {
         callback(false, "added " + quantity + "gms of item '" + name + "' to database");
     });
 }
+
+function get_incoming_stocks_from_json_ui(rows) {
+    var table = "<table class='TColor'><tr><th>Item Number</th><th>Quantity</th><th>Added On</th></tr>";
+    for (var i = 0; i < rows.length; i++) {
+        table += "<tr><td>" + rows[i].item_id + "</td><td>" + rows[i].sum +
+                                 "</td><td>" + rows[i].dt + "</td></tr>";
+    }
+    table += "</table>";
+    return table;
+}
+
+function db_get_incoming_stocks(callback) {
+    ajaxRequest("/api/get_incoming_stocks", function (error, data) {
+        if (error == true) {
+            callback(false, "Unablet to get incoming stocks");
+            return;
+        }
+        var obj = JSON.parse(data);
+        callback(false, obj);
+    });
+}
+
+function db_get_incoming_stocks_ui(callback) {
+    db_get_incoming_stocks(function (error, rows) {
+        var data;
+        if (error) {
+            data = "Error '" + rows + "'";
+        } else {
+            data = get_incoming_stocks_from_json_ui(rows);
+        }
+        callback(data);
+    });
+}

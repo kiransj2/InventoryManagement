@@ -36,6 +36,21 @@ app.get('/api/get_item_list', function (req, res) {
     return;
 });
 
+app.get('/api/get_incoming_stocks', function (req, res) {
+    console.log("get_incoming_stocks --> ");
+    db_logic.get_all_incoming_stock_on(db.db_date(), function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
+});
+
 app.get('/api/add_item', function (req, res) {
     db_logic.new_item(req.query.name, function (error, msg) {
         if (error === true) {
