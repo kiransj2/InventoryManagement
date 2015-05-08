@@ -2,6 +2,7 @@
 var db = require("./db");
 var util = require("util");
 
+var verbose = 0;
 function create_tables(callback) {
     var create_items_table =  
                 "CREATE TABLE Items( " + 
@@ -47,8 +48,7 @@ function validate_item_name(name) {
     if (letter.test(name)) {
         return true;
     }
-    else {
-        console.error("only characters, _ and - are allowed in item name");
+    else {        
         return false;
     }
     return false;
@@ -56,7 +56,9 @@ function validate_item_name(name) {
 
 function insert_item_name(name, callback) {
     if (!validate_item_name(name)) {
-        console.error("'" + name + "' does not meet the requirements");
+        if (verbose) {
+            console.error("'" + name + "' does not meet the requirements");
+        }
         process.nextTick(function () {
             callback(true, "name'" + name + "' does not meet the requirements");
             return;
@@ -85,11 +87,10 @@ function get_item_name(id, callback) {
             return;
         }
         if (rows.length == 1) {
-            console.log("item name = %s id = %d", rows[0].name, id);
             callback(false, rows[0].name);
         }  else if (rows.length == 0) {
-            console.error("No Element with id='%d' exists in db", id);
-            callback(true, "No Element with id='" + id + "' exists in db");
+            console.error("No Element with id='%d' found in db", id);
+            callback(true, "No Element with id='" + id + "' found in db");
         } else {
             console.error("more than 1 name exists for id = %d", id);
             callback(true, "more than 1 name exists for id = " + id);            
@@ -105,12 +106,11 @@ function get_item_id(name, callback) {
             callback(true, "Invalid id=" + id + ".");
             return;
         }
-        if (rows.length == 1) {
-            console.log("item name = %d id = %s", rows[0].id, name);
+        if (rows.length == 1) {            
             callback(false, rows[0].id);
         } else if (rows.length == 0) {
-            console.error("No Element with name='%s' exists in db", name);
-            callback(true, "No Element with name='" + name + "' exists in db");
+            console.error("No Element with name='%s' found in db", name);
+            callback(true, "No Element with name='" + name + "' found in db");
         } else {
             console.error("more than 1 id(%d) exists for name = '%s'", rows.length, name);
             callback(true, "more than 1 id exists for name = '" + name + "'");
@@ -120,7 +120,7 @@ function get_item_id(name, callback) {
 }
 
 function get_item_list(callback) {
-    var stmt = util.format("SELECT name, dt FROM ITEMS");
+    var stmt = util.format("SELECT id, name, dt FROM ITEMS");
     db.db_execute_query(stmt, function(err, rows) {
         if(err) {
             console.error("Query operation to fetch item list failed");
