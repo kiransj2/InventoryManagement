@@ -35,7 +35,7 @@
                     x.innerHTML = ""; 
                     for (var i = 0; i < obj.length; i++) {
                         var o = document.createElement('option');
-                        o.value = obj[i].id;
+                        o.value = obj[i].name;
                         o.text = obj[i].name;
                         x.options.add(o);
                     }
@@ -120,10 +120,9 @@
     <div id="incoming_stock" style="display: none;">
         <script type="text/javascript">
             function validate_new_incoming_stock_data() {              
-                var item_id = document.forms['incoming_stock']['itemlist'].value;
+                var item = document.forms['incoming_stock']['itemlist'].value;
                 var quantity = document.forms['incoming_stock']['quantity'].value;
-                alert(quantity);
-                return false;
+                return window.confirm("You want to add " + quantity + " gm of '" + item + "'");                
             }
         </script>
         <div class="input_form" >

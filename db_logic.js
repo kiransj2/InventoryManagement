@@ -2,7 +2,13 @@
 var db = require("./db");
 var util = require("util");
 
-var verbose = 0;
+var format = util.format;
+
+function verbose(msg) {
+    if (0) {
+        console.error(msg);
+    }
+}
 function create_tables(callback) {
     var create_items_table =  
                 "CREATE TABLE Items( " + 
@@ -13,10 +19,11 @@ function create_tables(callback) {
 
     var create_incoming_stock_table = 
                 "CREATE TABLE incoming_stocks("+
-                "id integer primary key,"+
+                "transaction_id integer PRIMARY KEY autoincrement,"+
+                "item_id integer NOT NULL,"+
                 "quantity integer NOT NULL,"+
                 "dt datetime  NOT NULL default (datetime('now')),"+
-                "FOREIGN KEY (ID) REFERENCES Items(id));";
+                "FOREIGN KEY (item_id) REFERENCES Items(id));";
     
     var table_count = 2, error_count = 0;      
     db.db_new_table(create_items_table, function (err) {
@@ -56,24 +63,22 @@ function validate_item_name(name) {
 }
 
 function insert_item_name(name, callback) {
-    if (!validate_item_name(name)) {
-        if (verbose) {
-            console.error("'" + name + "' does not meet the requirements");
-        }
+    if (!validate_item_name(name)) {        
+        verbose("'" + name + "' does not meet the requirements");      
         process.nextTick(function () {
             callback(true, "name'" + name + "' does not meet the requirements");
             return;
         });
         return;
     } else {
-        var stmt = util.format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_date_now());
+        var stmt = format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_date_now());
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
                 console.error("Insert operation for name '" + name + "' failed due to " + err);
                 callback(true, "Insert operation failed");
                 return;
             }
-            callback(false);
+            callback(false, "done");
             return;
         });
     }
@@ -81,7 +86,7 @@ function insert_item_name(name, callback) {
 }
 
 function get_item_name(id, callback) {
-    var stmt = util.format("SELECT name FROM ITEMS WHERE id = %d", id);
+    var stmt = format("SELECT name FROM ITEMS WHERE id = %d", id);
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             callback(true, "Invalid id=" + id + ".");
@@ -101,7 +106,7 @@ function get_item_name(id, callback) {
 }
 
 function get_item_id(name, callback) {
-    var stmt = util.format("SELECT id FROM ITEMS WHERE name = '%s'", name);
+    var stmt = format("SELECT id FROM ITEMS WHERE name = '%s'", name);
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             callback(true, "Invalid id=" + id + ".");
@@ -110,7 +115,7 @@ function get_item_id(name, callback) {
         if (rows.length == 1) {            
             callback(false, rows[0].id);
         } else if (rows.length == 0) {
-            console.error("No Element with name='%s' found in db", name);
+            verbose(format("No Element with name='%s' found in db", name));
             callback(true, "No Element with name='" + name + "' found in db");
         } else {
             console.error("more than 1 id(%d) exists for name = '%s'", rows.length, name);
@@ -121,7 +126,7 @@ function get_item_id(name, callback) {
 }
 
 function get_item_list(callback) {
-    var stmt = util.format("SELECT id, name, dt FROM ITEMS");
+    var stmt = format("SELECT id, name, dt FROM ITEMS");
     db.db_execute_query(stmt, function(err, rows) {
         if(err) {
             console.error("Query operation to fetch item list failed");
@@ -134,53 +139,43 @@ function get_item_list(callback) {
     return;
 }
 
-var test = 0;
-if (test) {
-    if (!db.db_init(true)) {
-        console.error("Unable to open database file");
-        process.exit(1);
+function insert_incoming_stocks(name, quantity, callback) {
+    if (typeof quantity !== "number") {
+        verbose(format("quantity is not numeric insted it is %s", typeof quantity));
+        process.nextTick(function () {
+            callback(true, "quantity is not numeric value");
+        });
+        return;
     }
-    insert_item_name("kiran", function (err) {
+    // Min of 1 gm and max of 250KG
+    if ((quantity < 1) || (quantity > 250000)) {
+        verbose("quantity is not in range of 1gm to 250KG");
+        process.nextTick(function () {
+            callback(true, "quantity is not in range of 1gm to 250KG");            
+        });
+        return;
+    }
+    get_item_id(name, function (err, id){
         if (err) {
-            console.error("failed to insert name");
-        }
-        else {
-            console.log("Inserted name")
-        }
-    });
-    
-    get_item_list(function (err, rows) {
-        if (err) {
-            console.error("get_item_list() failed");
+            var msg = format("item name '%s' is invalid.", name);
+            verbose(msg);
+            callback(true, msg);
             return;
         }
-        console.log("Number of rows : %d", rows.length);
-        for (var i = 0; i < rows.length; i++) {
-            console.log("%d --> %s --> %s", rows[i].id, rows[i].name, rows[i].dt);
-        }
-    });
-    
-    var i_id = 4;
-    get_item_name(i_id, function (err, name) {
-        if (err) {
-            console.error("failed to get name");
-        } else {
-            console.log("Item name = %s, id = %d", name, i_id);
-        }
-    });
-
-    get_item_id("B_flower", function (err, id) {
-        if (err) {
-            console.error("failed to get id");
-        } else {
-            console.log("Item name = %s, id = %d", "B_flower", id);
-        }
-    });
-
-    db.db_exit();
+        var stmt; 
+        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, db.db_date_now());
+        verbose(stmt);
+        db.db_execute_query(stmt, function (err, rows) {
+            if (err) {
+                console.error("Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err);
+                callback(true, "Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err);
+                return;
+            }
+            callback(false, format("Added %d gms of item %s to db.", quantity, name));
+            return;
+        });
+    })
 }
-
-
 
 module.exports = {
     build_tables: create_tables,
@@ -188,4 +183,5 @@ module.exports = {
     item_id: get_item_id,
     item_name: get_item_name,
     item_list: get_item_list,
+    new_stock: insert_incoming_stocks,
 };

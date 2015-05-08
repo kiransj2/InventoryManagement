@@ -55,7 +55,7 @@ function db_status() {
 }
 
 function db_execute_query(query, callback) {
-    //Log the query being Executed here
+    //todo: Log the query being Executed here
     db.all(query, callback);
     return;
 }

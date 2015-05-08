@@ -50,6 +50,22 @@ app.get('/api/add_item', function (req, res) {
         }
         return;
     });
+});
+
+app.get('/api/new_stock', function (req, res) {
+    db_logic.new_stock(req.query.name, req.query.quantity, function (error, msg) {
+        if (error === true) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(msg);
+            console.log(msg);
+            return;
+        } else {
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(msg);
+            console.log("added item " + req.query.name + " to db");
+        }
+        return;
+    });
 
 });
 
