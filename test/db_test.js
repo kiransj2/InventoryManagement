@@ -8,47 +8,37 @@ var fs = require("fs");
 var test_db_path = "db/test_db.db";
 db.db_set_path(test_db_path);
 
+function assert(cond, msg) {
+    if(cond) {
+        console.error("=================Fatal====================");
+        console.error("Error:" + msg);
+        process.exit(1);
+    }
+}
+
 if (fs.existsSync(test_db_path)) {
     fs.unlinkSync(test_db_path);
 }
 
 
-if (db.db_status()) {
-    console.error("db is open even before we initialized");
-    process.exit(1);
-}
-
-if (!db.db_init(true)) {
-    console.error("unable open/create db file %s", test_db_path);
-    process.exit(1);
-}
-
-if (!db.db_status()) {
-    console.error("db_failure!");
-    process.exit(1);
-}
+assert(db.db_status(), "db is open even before we initialized")
+assert(!db.db_init(true), util.format("unable open/create db file %s", test_db_path));
+assert(!db.db_status(), "db_failure! not sure why!!");
 
 db_logic.build_tables(function (error_count) {
-    if (!error_count) {
-        add_entries();
-    } else {
-        console.log("error :(");
-    }
+    assert(error_count, "some tables where not created");
+    add_entries();
 });
 
 var name = "cashew";
 var num_entries = 10;
 function add_entries() {
-    var error_count = 0, entry_count = 0;
+    var entry_count = 0;
     console.log("adding %d entries to db", num_entries);
     for (var i = 0; i < num_entries; i++) {
         db_logic.new_item(name + i + "_" + "-", function (err, msg) {
             entry_count++;
-            if (err) {
-                console.error("error inserting item");
-                process.exit(1);
-                error_count++;
-            }
+            assert(err, "Inserting item failed");
 
             if (entry_count == num_entries) {
                 get_entries_and_check();
@@ -67,49 +57,28 @@ function add_entries() {
     str[6] = "k";
     for (i = 0; i < str.length; i++) {
         db_logic.new_item(str[i], function (err, msg) {
-            if (!err) {
-                console.error("negative test failed for adding name which doesn't match requirement");
-                process.exit(1);
-            }
+            assert(!err, "negative test failed for adding name which doesn't match requirement");
         });
     }
 }
 
 function test_get_name_id(name, id) {
     db_logic.item_id(name, function (err, id1) {
-        if (err) {
-            console.error("item_id() function failed");
-            process.exit(1);
-        }
-        if (id != id1) {
-            console.error("expected %d != %d for item %s", id, id1, name);
-            process.exit(1);
-        }
+        assert(err, "item_id() function failed");
+        assert(id != id1, util.format("expected %d != %d for item %s", id, id1, name));
     });
 
     db_logic.item_name(id, function (err, name1) {
-        if (err) {
-            console.error("item_id() function failed on %s %d", name, id);
-            process.exit(1);
-        }
-        if (name != name1) {
-            console.error("expected %s != %s for item %d", name, name1, id);
-            process.exit(1);
-        }
+        assert(err, util.format("item_id() function failed on %s %d", name, id));
+        assert(name != name1, util.format("expected %s != %s for item %d", name, name1, id));
     });
 }
 
 function get_entries_and_check() {
     console.log("get entries from db and check");
     db_logic.item_list(function (err, rows) {
-        if (err) {
-            console.error("get_entries_and_check failed");
-            process.exit(1);
-        }
-        if (rows.length != num_entries) {
-            console.error("number of entries %d does not match with %d", rows.length, num_entries);
-            process.exit(1);
-        }
+        assert(err, "get_entries_and_check failed");
+        assert(rows.length != num_entries, util.format("number of entries %d does not match with %d", rows.length, num_entries));
         console.log("check getting id and getting name functions on each values");
         for (var i = 0; i < rows.length; i++) {
             test_get_name_id(rows[i].name, rows[i].id);
