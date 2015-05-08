@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>    
+    <head>
+        <title>The Golden Nuts</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="/res/goldennuts.css" />
+        <script type="text/javascript">
+            function add_new_item() {
+                document.getElementById('data').innerHTML = document.getElementById('new_item').innerHTML;
+            }
+        </script>
+    </head>
+<body>
+
+    <div id="header">
+        <h1>The Golden Nuts</h1>
+    </div>
+
+    <div id="navigation">
+        <a onclick="jsfunction('item_list')" href="javascript:void(0);">Item List</a><br>
+        <a onclick="jsfunction('cur_stocks')" href="javascript:void(0);">Current Stocks</a><br>
+        <a onclick="jsfunction('incoming_stocks')" href="javascript:void(0);">Incoming Stocks</a><br>
+        <a onclick="jsfunction('outgoing_stocks')" href="javascript:void(0);">outgoing_stocks</a><br>
+        <a onclick="jsfunction('opening_stocks')" href="javascript:void(0);">Opening Stocks</a><br>
+        <hr />
+        <a onclick="add_new_item()" href="javascript:void(0);">Add new Item</a><br>
+        <a onclick="jsfunction('add_incoming_item')" href="javascript:void(0);">Add incoming item</a><br>
+        <a onclick="jsfunction('add_outgoing_item')" href="javascript:void(0);">Add outgoing item</a><br>
+        <hr />
+    </div>
+
+    <div id="data">
+        <p> This part will have data </p>
+    </div>
+
+    <div id="footer">
+        <p> This part will have footer </p>
+    </div>
+
+    <div id="new_item" style="display: none;">
+        <div class="new_item_form">
+            <form name='new_item' onsubmit='return validate_form_values()'>
+                <h1> Add New Item </h1>
+                <input type="text" name='name' id='tags' placeholder="Item Name" /><br /><br />
+                <input type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

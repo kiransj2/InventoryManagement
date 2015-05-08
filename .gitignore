@@ -1,0 +1,4 @@
+*.o
+*.a
+*.db
+node_modules

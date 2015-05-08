@@ -12,6 +12,12 @@ if (fs.existsSync(test_db_path)) {
     fs.unlinkSync(test_db_path);
 }
 
+
+if (db.db_status()) {
+    console.error("db is open even before we initialized");
+    process.exit(1);
+}
+
 if (!db.db_init(true)) {
     console.error("unable open/create db file %s", test_db_path);
     process.exit(1);
@@ -46,12 +52,12 @@ function add_entries() {
 
             if (entry_count == num_entries) {
                 get_entries_and_check();
-            }            
-        });        
+            }
+        });
     }
-    
+
     console.log("check giving names which does not meet the requirement.")
-    var str = [];    
+    var str = [];
     str[0] = "kiran is";
     str[1] = "!kiran";
     str[2] = "#kiran";
@@ -59,7 +65,7 @@ function add_entries() {
     str[4] = "kiran%is%";
     for (i = 0; i < str.length; i++) {
         db_logic.new_item(str[i], function (err, msg) {
-            if (!err) {                
+            if (!err) {
                 console.error("negative test failed for adding name which doesn't match requirement");
                 process.exit(1);
             }
@@ -70,7 +76,7 @@ function add_entries() {
 function test_get_name_id(name, id) {
     db_logic.item_id(name, function (err, id1) {
         if (err) {
-            console.error("item_id() function failed"); 
+            console.error("item_id() function failed");
             process.exit(1);
         }
         if (id != id1) {
@@ -103,8 +109,8 @@ function get_entries_and_check() {
             process.exit(1);
         }
         console.log("check getting id and getting name functions on each values");
-        for (var i = 0; i < rows.length; i++) {            
+        for (var i = 0; i < rows.length; i++) {
             test_get_name_id(rows[i].name, rows[i].id);
-        }        
+        }
     });
 }
