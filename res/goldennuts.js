@@ -71,3 +71,14 @@ function db_get_items_table_ui(callback) {
         callback(data);
     });
 }
+
+function db_add_stock(name, quantity, callback) {
+    var url = "/api/add_stock?name=" + name + "&quantity=" + quantity;
+    ajaxRequest(url, function (error, data) {
+        if (error == true) {
+            callback(true, name + " already exists");
+            return;
+        }
+        callback(false, "added " + quantity + "gms of item '" + name + "' to database");
+    });
+}

@@ -3,9 +3,10 @@ var db = require("./db");
 var util = require("util");
 
 var format = util.format;
+var verbose = 0;
 
-function verbose(msg) {
-    if (0) {
+function log(msg) {
+    if (verbose) {
         console.error(msg);
     }
 }
@@ -66,7 +67,7 @@ function validate_item_name(name) {
 
 function insert_item_name(name, callback) {
     if (!validate_item_name(name)) {        
-        verbose("'" + name + "' does not meet the requirements");      
+        log("'" + name + "' does not meet the requirements");      
         process.nextTick(function () {
             callback(true, "name'" + name + "' does not meet the requirements");
             return;
@@ -117,7 +118,7 @@ function get_item_id(name, callback) {
         if (rows.length == 1) {            
             callback(false, rows[0].id);
         } else if (rows.length == 0) {
-            verbose(format("No Element with name='%s' found in db", name));
+            log(format("No Element with name='%s' found in db", name));
             callback(true, "No Element with name='" + name + "' found in db");
         } else {
             console.error("more than 1 id(%d) exists for name = '%s'", rows.length, name);
@@ -129,7 +130,7 @@ function get_item_id(name, callback) {
 
 function get_item_list(callback) {
     var stmt = format("SELECT id, name, dt FROM ITEMS");
-    verbose(stmt);
+    log(stmt);
     db.db_execute_query(stmt, function(err, rows) {
         if(err) {
             console.error("Query operation to fetch item list failed");
@@ -147,8 +148,9 @@ function isDate (date) {
 }
 
 function insert_incoming_stocks(name, quantity, when, callback) {
+    log(format("%s ---> %s", name, quantity));
     if (typeof quantity !== "number") {
-        verbose(format("quantity is not numeric insted it is %s", typeof quantity));
+        log(format("quantity is not numeric insted it is %s", typeof quantity));
         process.nextTick(function () {
             callback(true, "quantity is not numeric value");
         });
@@ -156,7 +158,7 @@ function insert_incoming_stocks(name, quantity, when, callback) {
     }
     // Min of 1 gm and max of 250KG
     if ((quantity < 1) || (quantity > 250000)) {
-        verbose("quantity is not in range of 1gm to 250KG");
+        log("quantity is not in range of 1gm to 250KG");
         process.nextTick(function () {
             callback(true, "quantity is not in range of 1gm to 250KG");            
         });
@@ -173,14 +175,14 @@ function insert_incoming_stocks(name, quantity, when, callback) {
     get_item_id(name, function (err, id){
         if (err) {
             var msg = format("item name '%s' is invalid.", name);
-            verbose(msg);
+            log(msg);
             callback(true, msg);
             return;
         }
         var stmt;
         var d = (when === null) ? db.db_datetime() : when;
         stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, d);
-        verbose(stmt);
+        log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
                 console.error("Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err);
@@ -196,7 +198,7 @@ function insert_incoming_stocks(name, quantity, when, callback) {
 function get_all_incoming_stock_on(when, callback) {
     var stmt = format("SELECT item_id, SUM(quantity) as sum, dt FROM incoming_stocks " +
                       "where (dt == '%s') group by item_id order by item_id ASC", when);
-    verbose(stmt);
+    log(stmt);
 
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
@@ -204,7 +206,7 @@ function get_all_incoming_stock_on(when, callback) {
             callback(true, "Query operation to fetch item list failed");
             return;
         }
-        verbose(format("rows.length = %d", rows.length));
+        log(format("rows.length = %d", rows.length));
         callback(false, rows);
         return;
     });

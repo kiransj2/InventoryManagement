@@ -52,8 +52,9 @@ app.get('/api/add_item', function (req, res) {
     });
 });
 
-app.get('/api/new_stock', function (req, res) {
-    db_logic.new_stock(req.query.name, req.query.quantity, function (error, msg) {
+app.get('/api/add_stock', function (req, res) {
+    console.log("add stock %s --> %d gm", req.query.name, req.query.quantity);
+    db_logic.new_stock(req.query.name, parseInt(req.query.quantity), null, function (error, msg) {
         if (error === true) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end(msg);

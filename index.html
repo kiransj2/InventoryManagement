@@ -119,19 +119,39 @@
     <!--This part contains the incoming_stocks UI Hidden by default. -->
     <div id="incoming_stock" style="display: none;">
         <script type="text/javascript">
-            function validate_new_incoming_stock_data() {              
+            function validate_incoming_stock_data() {               
                 var item = document.forms['incoming_stock']['itemlist'].value;
                 var quantity = document.forms['incoming_stock']['quantity'].value;
-                return window.confirm("You want to add " + quantity + " gm of '" + item + "'");                
+                return true;                
+            }
+
+            function incoming_stock_action() {
+                var name = document.forms['incoming_stock']['itemlist'].value;
+                var quantity = document.forms['incoming_stock']['quantity'].value;
+                var r = window.confirm("Please confirm to add " + quantity + " gms of '" + name + "' to database ?");
+                if (r == false) {
+                    return;
+                }
+                
+                db_add_stock(name, quantity, function (error, msg) {
+                    if (error === false) {
+                        document.getElementById('data').innerHTML = "Added Item <b>" + msg + "</b>";
+                    } else {
+                        document.getElementById('data').innerHTML = "Error: Item <b>" + msg + "</b> in Database";
+                    }
+                });
             }
         </script>
         <div class="input_form" >
-            <form name='incoming_stock' onsubmit='return validate_new_incoming_stock_data()'>
+            <form name='incoming_stock'
+                  action='javascript:incoming_stock_action()'
+                  onsubmit='return validate_incoming_stock_data()'>
+
                 <h1> Incoming Stocks </h1>
                 <select id="itemlist" name="itemlist" required></select>
-                <input type="number" class="required" min="1" 
+                <input type="number" class="required" min="1"
                        max="250000" name='quantity' id='tags'
-                       placeholder="quantity in gms" 
+                       placeholder="quantity in gms"
                        required />
                 <br /><br />
                 <input type="submit" value="Submit" />
