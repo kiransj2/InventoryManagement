@@ -8,6 +8,10 @@ var fs = require("fs"),
 var db;
 var repository = "./mydb.db";
 
+function db_set_db_path(path) {
+    repository = path;
+}
+
 // time_now function is used to get the cur_time 
 function date_now() {
     var date = new Date();
@@ -20,10 +24,13 @@ function build_date(year, month, day) {
     return str;
 }
 
-function db_open() {
+function db_open(create_new) { 
     if (typeof db === 'undefined') {
         if (fs.existsSync(repository)) {
-            db = new sqlite3.Database(repository);
+            db = new sqlite3.Database(repository);                           
+            return true;
+        } else if (create_new) {
+            db = new sqlite3.Database(repository, sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
             return true;
         }
     } else {
@@ -89,11 +96,13 @@ function db_execute(query, callback) {
 
 module.exports = {
     db_init: db_open,
+    db_status: db_status,
+    db_set_path: db_set_db_path,
     db_exit: db_close,
     db_new_table: db_create_table,
     db_date_now: date_now,
     db_date: build_date,
-    db_execute_query: db_execute
+    db_execute_query: db_execute,
 };
 
 

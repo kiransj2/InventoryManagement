@@ -2,7 +2,7 @@
 var db = require("./db");
 var util = require("util");
 
-function create_tables() {
+function create_tables(callback) {
     var create_items_table =  
                 "CREATE TABLE Items( " + 
                 "id integer PRIMARY KEY autoincrement, " +
@@ -16,21 +16,28 @@ function create_tables() {
                 "quantity integer NOT NULL,"+
                 "dt datetime  NOT NULL default (datetime('now')),"+
                 "FOREIGN KEY (ID) REFERENCES Items(id));";
-
+    
+    var table_count = 2, error_count = 0;      
     db.db_new_table(create_items_table, function (err) {
+        table_count--;
         if (err) {
-            console.error("Error creating Items table");
-            return;
+            error_count++;
+            console.error("Error creating Items table");            
         }
-        console.log("Created Items table");
+        if (!table_count) {
+            callback(error_count);
+        }
     });
 
-    db.db_new_table(create_incoming_stock_table, function(err) {
+    db.db_new_table(create_incoming_stock_table, function (err) {
+        table_count--;
         if (err) {
-            console.error("Error creating incoming_stock table");
-            return;
+            error_count++;
+            console.error("Error creating incoming_stock table");            
         }
-        console.log("Created incoming_stocks table");
+        if (!table_count) {
+            callback(error_count);
+        }
     });
 }
 
@@ -70,18 +77,114 @@ function insert_item_name(name, callback) {
     return;
 }
 
-if (!db.db_init()) {
-    console.error("Unable to open database file");
-    process.exit(1);
+function get_item_name(id, callback) {
+    var stmt = util.format("SELECT name FROM ITEMS WHERE id = %d", id);
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            callback(true, "Invalid id=" + id + ".");
+            return;
+        }
+        if (rows.length == 1) {
+            console.log("item name = %s id = %d", rows[0].name, id);
+            callback(false, rows[0].name);
+        }  else if (rows.length == 0) {
+            console.error("No Element with id='%d' exists in db", id);
+            callback(true, "No Element with id='" + id + "' exists in db");
+        } else {
+            console.error("more than 1 name exists for id = %d", id);
+            callback(true, "more than 1 name exists for id = " + id);            
+        }
+        return;
+    });
 }
 
-insert_item_name("kiran", function (err) {
-    if (err) {
-        console.error("failed to insert name");
-    }
-    else {
-        console.log("Inserted name")
-    }
-});
+function get_item_id(name, callback) {
+    var stmt = util.format("SELECT id FROM ITEMS WHERE name = '%s'", name);
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            callback(true, "Invalid id=" + id + ".");
+            return;
+        }
+        if (rows.length == 1) {
+            console.log("item name = %d id = %s", rows[0].id, name);
+            callback(false, rows[0].id);
+        } else if (rows.length == 0) {
+            console.error("No Element with name='%s' exists in db", name);
+            callback(true, "No Element with name='" + name + "' exists in db");
+        } else {
+            console.error("more than 1 id(%d) exists for name = '%s'", rows.length, name);
+            callback(true, "more than 1 id exists for name = '" + name + "'");
+        }
+        return;
+    });
+}
 
-db.db_exit();
+function get_item_list(callback) {
+    var stmt = util.format("SELECT name, dt FROM ITEMS");
+    db.db_execute_query(stmt, function(err, rows) {
+        if(err) {
+            console.error("Query operation to fetch item list failed");
+            callback(true, "Query operation to fetch item list failed");
+            return;
+        }
+        callback(false, rows);
+        return;
+    });
+    return;
+}
+
+var test = 0;
+if (test) {
+    if (!db.db_init(true)) {
+        console.error("Unable to open database file");
+        process.exit(1);
+    }
+    insert_item_name("kiran", function (err) {
+        if (err) {
+            console.error("failed to insert name");
+        }
+        else {
+            console.log("Inserted name")
+        }
+    });
+    
+    get_item_list(function (err, rows) {
+        if (err) {
+            console.error("get_item_list() failed");
+            return;
+        }
+        console.log("Number of rows : %d", rows.length);
+        for (var i = 0; i < rows.length; i++) {
+            console.log("%d --> %s --> %s", rows[i].id, rows[i].name, rows[i].dt);
+        }
+    });
+    
+    var i_id = 4;
+    get_item_name(i_id, function (err, name) {
+        if (err) {
+            console.error("failed to get name");
+        } else {
+            console.log("Item name = %s, id = %d", name, i_id);
+        }
+    });
+
+    get_item_id("B_flower", function (err, id) {
+        if (err) {
+            console.error("failed to get id");
+        } else {
+            console.log("Item name = %s, id = %d", "B_flower", id);
+        }
+    });
+
+    db.db_exit();
+}
+
+
+
+module.exports = {
+    build_tables: create_tables,
+    new_item: insert_item_name,
+    item_id: get_item_id,
+    item_name: get_item_name,
+    item_list: get_item_list,
+};
