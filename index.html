@@ -6,8 +6,20 @@
         <link rel="stylesheet" href="/res/goldennuts.css" />
         <script src="/res/goldennuts.js"></script>
         <script type="text/javascript">
+            function set_data_section(obj) {
+                document.getElementById('data').innerHTML = obj;
+            }
+        </script>
+
+        <script type="text/javascript">
             function add_new_item() {
-                document.getElementById('data').innerHTML = document.getElementById('new_item').innerHTML;
+                set_data_section(document.getElementById('new_item').innerHTML);
+            }
+
+            function list_all_items() {
+                db_get_items_table(function (table) {
+                    set_data_section(table);
+                });                
             }
         </script>
     </head>
@@ -18,7 +30,7 @@
     </div>
 
     <div id="navigation">
-        <a onclick="jsfunction('item_list')" href="javascript:void(0);">Item List</a><br>
+        <a onclick="list_all_items()" href="javascript:void(0);">Item List</a><br>
         <a onclick="jsfunction('cur_stocks')" href="javascript:void(0);">Current Stocks</a><br>
         <a onclick="jsfunction('incoming_stocks')" href="javascript:void(0);">Incoming Stocks</a><br>
         <a onclick="jsfunction('outgoing_stocks')" href="javascript:void(0);">outgoing_stocks</a><br>

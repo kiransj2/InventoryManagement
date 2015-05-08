@@ -20,6 +20,22 @@ app.get('/res/*', function(req, res) {
     res.sendFile(__dirname + '/res/' + req.params[0]);
 });
 
+app.get('/api/get_item_list', function (req, res) {
+    console.log("get_item_list --> ");
+    
+    db_logic.item_list(function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
+});
+
 app.get('/api/add_item', function (req, res) {
     db_logic.new_item(req.query.name, function (error, msg) {
         if (error === true) {

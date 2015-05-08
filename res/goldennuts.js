@@ -38,3 +38,36 @@ function db_add_new_item(name, callback) {
         callback(false, name);
     });
 }
+
+function db_get_all_items(callback) {
+    ajaxRequest("/api/get_item_list", function (error, data) {
+        if (error == true) {
+            callback(false, "Unablet to get item list");
+            return;
+        }
+        var obj = JSON.parse(data);
+        callback(false, obj);
+    });
+}
+
+function get_item_table_from_json(rows) {
+    var table = "<table class='TColor'><tr><th>Item Number</th><th>Item Name</th><th>Added On</th></tr>";
+    for (var i = 0; i < rows.length; i++) {
+        table += "<tr><td>" + rows[i].id + "</td><td>" + rows[i].name +
+                                 "</td><td>" + rows[i].dt + "</td></tr>";
+    }
+    table += "</table>";
+    return table;
+}
+
+function db_get_items_table(callback) {
+    db_get_all_items(function (error, rows) {
+        var data;
+        if (error) {
+            data = "Error '" + rows + "'";            
+        } else {
+            data = get_item_table_from_json(rows);
+        }
+        callback(data);
+    });
+}
