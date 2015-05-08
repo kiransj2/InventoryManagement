@@ -50,7 +50,7 @@ function db_get_all_items(callback) {
     });
 }
 
-function get_item_table_from_json(rows) {
+function get_item_table_from_json_ui(rows) {
     var table = "<table class='TColor'><tr><th>Item Number</th><th>Item Name</th><th>Added On</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         table += "<tr><td>" + rows[i].id + "</td><td>" + rows[i].name +
@@ -60,13 +60,13 @@ function get_item_table_from_json(rows) {
     return table;
 }
 
-function db_get_items_table(callback) {
+function db_get_items_table_ui(callback) {
     db_get_all_items(function (error, rows) {
         var data;
         if (error) {
             data = "Error '" + rows + "'";            
         } else {
-            data = get_item_table_from_json(rows);
+            data = get_item_table_from_json_ui(rows);
         }
         callback(data);
     });

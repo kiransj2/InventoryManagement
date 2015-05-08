@@ -17,9 +17,31 @@
             }
 
             function list_all_items() {
-                db_get_items_table(function (table) {
+                db_get_items_table_ui(function (table) {
                     set_data_section(table);
                 });                
+            }
+
+            function add_incoming_stock() {
+                db_get_all_items(function (err, obj) {
+                    if (err) {
+                        set_data_section("unable to load item list due to error '" + obj + "'");
+                        return;
+                    }
+                    
+                    var x = document.getElementById("itemlist");
+                    // Clear the existings element from the options
+                    // and then add the new options values.
+                    x.innerHTML = ""; 
+                    for (var i = 0; i < obj.length; i++) {
+                        var o = document.createElement('option');
+                        o.value = obj[i].id;
+                        o.text = obj[i].name;
+                        x.options.add(o);
+                    }
+                    x.innerHTML = "<option disabled selected> -- select an option -- </option>" + x.innerHTML;
+                    set_data_section(document.getElementById('incoming_stock').innerHTML);
+                });
             }
         </script>
     </head>
@@ -36,8 +58,8 @@
         <a onclick="jsfunction('outgoing_stocks')" href="javascript:void(0);">outgoing_stocks</a><br>
         <a onclick="jsfunction('opening_stocks')" href="javascript:void(0);">Opening Stocks</a><br>
         <hr />
-        <a onclick="add_new_item()" href="javascript:void(0);">Add new Item</a><br>
-        <a onclick="jsfunction('add_incoming_item')" href="javascript:void(0);">Add incoming item</a><br>
+        <a onclick="add_new_item()" href="javascript:void(0);">Add New Item</a><br>
+        <a onclick="add_incoming_stock()" href="javascript:void(0);">Add Incoming Stock</a><br>
         <a onclick="jsfunction('add_outgoing_item')" href="javascript:void(0);">Add outgoing item</a><br>
         <hr />
     </div>
@@ -52,7 +74,7 @@
 
     <!--This part contains the new item UI Hidden by default. -->
     <div id="new_item" style="display: none;">
-        <script>
+        <script type="text/javascript">
             function validate_new_item_form_data() {
                 var name = document.forms['new_item']['name'].value;
                 if (name == "") {
@@ -79,10 +101,40 @@
                 });
             }
         </script>
-        <div class="new_item_form">
-            <form name='new_item' action='javascript:new_item_action()' onsubmit='return validate_new_item_form_data()'>
+        <div class="input_form">
+            <form name='new_item' 
+                  action='javascript:new_item_action()' 
+                  onsubmit='return validate_new_item_form_data()'>
+
                 <h1> Add New Item </h1>
-                <input type="text" name='name' id='tags' placeholder="Item Name" /><br /><br />
+                <input type="text" name='name' pattern=".{5,}" 
+                       required title="5 letters minimum" id='tags' 
+                       placeholder="Item Name" />
+                <br /><br />
+                <input type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
+
+    <!--This part contains the incoming_stocks UI Hidden by default. -->
+    <div id="incoming_stock" style="display: none;">
+        <script type="text/javascript">
+            function validate_new_incoming_stock_data() {              
+                var item_id = document.forms['incoming_stock']['itemlist'].value;
+                var quantity = document.forms['incoming_stock']['quantity'].value;
+                alert(quantity);
+                return false;
+            }
+        </script>
+        <div class="input_form" >
+            <form name='incoming_stock' onsubmit='return validate_new_incoming_stock_data()'>
+                <h1> Incoming Stocks </h1>
+                <select id="itemlist" name="itemlist" required></select>
+                <input type="number" class="required" min="1" 
+                       max="250000" name='quantity' id='tags'
+                       placeholder="quantity in gms" 
+                       required />
+                <br /><br />
                 <input type="submit" value="Submit" />
             </form>
         </div>
