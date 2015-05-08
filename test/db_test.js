@@ -63,6 +63,8 @@ function add_entries() {
     str[2] = "#kiran";
     str[3] = "kiranis$";
     str[4] = "kiran%is%";
+    str[5] = "kira";
+    str[6] = "k";
     for (i = 0; i < str.length; i++) {
         db_logic.new_item(str[i], function (err, msg) {
             if (!err) {

@@ -44,6 +44,7 @@ function create_tables(callback) {
 
 function validate_item_name(name) {
     if (name === "") return false;
+    if (name.length < 5) return false;
     var letter = /^[0-9a-zA-Z_\-]+$/;
     if (letter.test(name)) {
         return true;

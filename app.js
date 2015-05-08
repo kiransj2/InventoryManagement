@@ -20,6 +20,23 @@ app.get('/res/*', function(req, res) {
     res.sendFile(__dirname + '/res/' + req.params[0]);
 });
 
+app.get('/api/add_item', function (req, res) {
+    db_logic.new_item(req.query.name, function (error, msg) {
+        if (error === true) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end("could not add " + req.query.name + " to db");
+            console.log("cound not add element " + req.query.name + " to db due to " + msg);
+            return;
+        } else {
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end("added item " + req.query.name + " to db");
+            console.log("added item " + req.query.name + " to db");
+        }
+        return;
+    });
+
+});
+
 http.listen(80, function(){
     console.log("listening on http://%s:80", hostname);
 });

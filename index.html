@@ -4,6 +4,7 @@
         <title>The Golden Nuts</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="/res/goldennuts.css" />
+        <script src="/res/goldennuts.js"></script>
         <script type="text/javascript">
             function add_new_item() {
                 document.getElementById('data').innerHTML = document.getElementById('new_item').innerHTML;
@@ -37,9 +38,37 @@
         <p> This part will have footer </p>
     </div>
 
+    <!--This part contains the new item UI Hidden by default. -->
     <div id="new_item" style="display: none;">
+        <script>
+            function validate_new_item_form_data() {
+                var name = document.forms['new_item']['name'].value;
+                if (name == "") {
+                    return false;
+                } else if (!validate_item_name(name)) {
+                    alert("'" + name + "' can have only alphabets,_,- and digits.");
+                    return false;
+                }
+                return true;
+            }
+
+            function new_item_action() {
+                var name = document.forms['new_item']['name'].value;
+                var r = window.confirm("Please confirm to add '" + name + "' to database ?");
+                if (r == false) {
+                    return ;
+                }
+                db_add_new_item(name, function (error, msg) {
+                    if (error === false) {
+                        document.getElementById('data').innerHTML = "Added Item <b>" + msg + "</b> to Database";
+                    } else {
+                        document.getElementById('data').innerHTML = "Error: Item <b>" + msg + "</b> in Database";                        
+                    }
+                });
+            }
+        </script>
         <div class="new_item_form">
-            <form name='new_item' onsubmit='return validate_form_values()'>
+            <form name='new_item' action='javascript:new_item_action()' onsubmit='return validate_new_item_form_data()'>
                 <h1> Add New Item </h1>
                 <input type="text" name='name' id='tags' placeholder="Item Name" /><br /><br />
                 <input type="submit" value="Submit" />
