@@ -74,7 +74,7 @@ function insert_item_name(name, callback) {
         });
         return;
     } else {
-        var stmt = format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_datetime());
+        var stmt = format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_date());
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
                 console.error("Insert operation for name '" + name + "' failed due to " + err);
@@ -180,7 +180,7 @@ function insert_incoming_stocks(name, quantity, when, callback) {
             return;
         }
         var stmt;
-        var d = (when === null) ? db.db_datetime() : when;
+        var d = (when === null) ? db.db_date() : when;
         stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, d);
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
