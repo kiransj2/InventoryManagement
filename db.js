@@ -13,9 +13,15 @@ function db_set_db_path(path) {
 }
 
 // time_now function is used to get the cur_time 
-function date_now() {
+function date_datetime() {
     var date = new Date();
-    var str = util.format("%d-%d-%d %d-%d-%d", date.getFullYear(), date.getMonth()+1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds());
+    var str = util.format("%d-%d-%d", date.getFullYear(), date.getMonth()+1, date.getDate());
+    return str;
+}
+
+function date_date() {
+    var date = new Date();
+    var str = util.format("%d-%d-%d", date.getFullYear(), date.getMonth() + 1, date.getDate());
     return str;
 }
 
@@ -100,8 +106,8 @@ module.exports = {
     db_set_path: db_set_db_path,
     db_exit: db_close,
     db_new_table: db_create_table,
-    db_date_now: date_now,
-    db_date: build_date,
+    db_datetime: date_datetime,
+    db_date: date_date,
     db_execute_query: db_execute,
 };
 

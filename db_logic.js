@@ -14,7 +14,8 @@ function create_tables(callback) {
                 "CREATE TABLE Items( " + 
                 "id integer PRIMARY KEY autoincrement, " +
                 "name varchar(255) NOT NULL," +
-                "dt datetime NOT NULL default (datetime('now'))," +
+                "dt date NOT NULL default (date('now', 'localtime'))," +
+                "tm time NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
                 "UNIQUE (name));";
 
     var create_incoming_stock_table = 
@@ -22,7 +23,8 @@ function create_tables(callback) {
                 "transaction_id integer PRIMARY KEY autoincrement,"+
                 "item_id integer NOT NULL,"+
                 "quantity integer NOT NULL,"+
-                "dt datetime  NOT NULL default (datetime('now')),"+
+                "dt date  NOT NULL default (date('now', 'localtime'))," +
+                "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
                 "FOREIGN KEY (item_id) REFERENCES Items(id));";
     
     var table_count = 2, error_count = 0;      
@@ -71,7 +73,7 @@ function insert_item_name(name, callback) {
         });
         return;
     } else {
-        var stmt = format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_date_now());
+        var stmt = format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_datetime());
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
                 console.error("Insert operation for name '" + name + "' failed due to " + err);
@@ -127,6 +129,7 @@ function get_item_id(name, callback) {
 
 function get_item_list(callback) {
     var stmt = format("SELECT id, name, dt FROM ITEMS");
+    verbose(stmt);
     db.db_execute_query(stmt, function(err, rows) {
         if(err) {
             console.error("Query operation to fetch item list failed");
@@ -175,7 +178,7 @@ function insert_incoming_stocks(name, quantity, when, callback) {
             return;
         }
         var stmt;
-        var d = (when === null) ? db.db_date_now() : when;
+        var d = (when === null) ? db.db_datetime() : when;
         stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, d);
         verbose(stmt);
         db.db_execute_query(stmt, function (err, rows) {
@@ -190,6 +193,24 @@ function insert_incoming_stocks(name, quantity, when, callback) {
     })
 }
 
+function get_all_incoming_stock_on(when, callback) {
+    var stmt = format("SELECT item_id, SUM(quantity) as sum, dt FROM incoming_stocks " +
+                      "where (dt == '%s') group by item_id order by item_id ASC", when);
+    verbose(stmt);
+
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            console.error("Query operation to fetch item list failed");
+            callback(true, "Query operation to fetch item list failed");
+            return;
+        }
+        verbose(format("rows.length = %d", rows.length));
+        callback(false, rows);
+        return;
+    });
+    return;
+}
+
 
 
 module.exports = {
@@ -199,4 +220,5 @@ module.exports = {
     item_name: get_item_name,
     item_list: get_item_list,
     new_stock: insert_incoming_stocks,
+    get_all_incoming_stock_on: get_all_incoming_stock_on
 };
