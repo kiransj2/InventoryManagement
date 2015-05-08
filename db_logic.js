@@ -3,7 +3,7 @@ var db = require("./db");
 var util = require("util");
 
 var format = util.format;
-var verbose = 0;
+var verbose = 1;
 
 function log(msg) {
     if (verbose) {
@@ -13,7 +13,7 @@ function log(msg) {
 function create_tables(callback) {
     var create_items_table =  
                 "CREATE TABLE Items( " + 
-                "id integer PRIMARY KEY autoincrement, " +
+                "item_id integer PRIMARY KEY autoincrement, " +
                 "name varchar(255) NOT NULL," +
                 "dt date NOT NULL default (date('now', 'localtime'))," +
                 "tm time NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
@@ -26,7 +26,7 @@ function create_tables(callback) {
                 "quantity integer NOT NULL,"+
                 "dt date  NOT NULL default (date('now', 'localtime'))," +
                 "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
-                "FOREIGN KEY (item_id) REFERENCES Items(id));";
+                "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
     
     var table_count = 2, error_count = 0;      
     db.db_new_table(create_items_table, function (err) {
@@ -89,7 +89,7 @@ function insert_item_name(name, callback) {
 }
 
 function get_item_name(id, callback) {
-    var stmt = format("SELECT name FROM ITEMS WHERE id = %d", id);
+    var stmt = format("SELECT name FROM ITEMS WHERE item_id = %d", id);
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             callback(true, "Invalid id=" + id + ".");
@@ -109,14 +109,14 @@ function get_item_name(id, callback) {
 }
 
 function get_item_id(name, callback) {
-    var stmt = format("SELECT id FROM ITEMS WHERE name = '%s'", name);
+    var stmt = format("SELECT item_id FROM ITEMS WHERE name = '%s'", name);
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             callback(true, "Invalid id=" + id + ".");
             return;
         }
         if (rows.length == 1) {            
-            callback(false, rows[0].id);
+            callback(false, rows[0].item_id);
         } else if (rows.length == 0) {
             log(format("No Element with name='%s' found in db", name));
             callback(true, "No Element with name='" + name + "' found in db");
@@ -129,7 +129,7 @@ function get_item_id(name, callback) {
 }
 
 function get_item_list(callback) {
-    var stmt = format("SELECT id, name, dt FROM ITEMS");
+    var stmt = format("SELECT item_id, name, dt FROM ITEMS");
     log(stmt);
     db.db_execute_query(stmt, function(err, rows) {
         if(err) {

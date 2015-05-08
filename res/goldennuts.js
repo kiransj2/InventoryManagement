@@ -53,7 +53,7 @@ function db_get_all_items(callback) {
 function get_item_table_from_json_ui(rows) {
     var table = "<table class='TColor'><tr><th>Item Number</th><th>Item Name</th><th>Added On</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        table += "<tr><td>" + rows[i].id + "</td><td>" + rows[i].name +
+        table += "<tr><td>" + rows[i].item_id + "</td><td>" + rows[i].name +
                                  "</td><td>" + rows[i].dt + "</td></tr>";
     }
     table += "</table>";

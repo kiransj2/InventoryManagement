@@ -82,7 +82,7 @@ function get_entries_and_check() {
         assert(rows.length != num_entries, util.format("number of entries %d does not match with %d", rows.length, num_entries));
         console.log("check getting id and getting name functions on each values");
         for (var i = 0; i < rows.length; i++) {
-            test_get_name_id(rows[i].name, rows[i].id);
+            test_get_name_id(rows[i].name, rows[i].item_id);
         }
 
         add_new_stock_and_check(rows[0].name, rows[1].name, rows[2].name, rows[3].name);
