@@ -1,11 +1,11 @@
 ﻿"use strict";
-var db = require("./db");
+var db = require("../db");
+var db_logic = require("../db_logic");
 var util = require("util");
-var db_logic = require("./db_logic");
 var fs = require("fs");
 
 
-var test_db_path = "./test_db.db";
+var test_db_path = "db/test_db.db";
 db.db_set_path(test_db_path);
 
 if (fs.existsSync(test_db_path)) {

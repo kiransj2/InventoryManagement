@@ -6,7 +6,7 @@ var fs = require("fs"),
 
 // Global Variables
 var db;
-var repository = "./mydb.db";
+var repository = "./db/mydb.db";
 
 function db_set_db_path(path) {
     repository = path;
