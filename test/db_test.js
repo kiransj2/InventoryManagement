@@ -90,49 +90,60 @@ function get_entries_and_check() {
 
 function add_new_stock_and_check(name1, name2, name3, name4) {
     console.log("add stocks and run tests")
-    db_logic.new_stock(name1, -1, function (err, msg) {
+    db_logic.new_stock(name1, -1, null, function (err, msg) {
         assert(!err, "quantity is negative and no error reported." + msg);
     });
 
-    db_logic.new_stock(name1, 250001, function (err, msg) {
+    db_logic.new_stock(name1, 250001, null,  function (err, msg) {
         assert(!err, "quantity is more than 250KG and no error reported." + msg);
     });
 
-    db_logic.new_stock(name1, "123213", function (err, msg) {
+    db_logic.new_stock(name1, "123213", null,  function (err, msg) {
         assert(!err, "quantity is not numeric value and no error reported." + msg);
     });
-
-    db_logic.new_stock(name1, 450, function (err, msg) {
-        assert(err, "quantity is not numeric value and no error reported." + msg);
-    });
-
-    db_logic.new_stock(name1, 1, function (err, msg) {
-        assert(err, "adding 1 gm failed" + msg);
-    });
-
-    db_logic.new_stock(name2, 250000, function (err, msg) {
-        assert(err, "adding 250KG  failed" + msg);
-    });
-
-    db_logic.new_stock(name3, 250, function (err, msg) {
-        assert(err, "adding 250gm  failed" + msg);
-    });
     
-    db_logic.new_stock(name4, 119876, function (err, msg) {
-        assert(err, "adding 1 gm failed" + msg);
-    });
-    
-    db_logic.new_stock(name1, 250000, function (err, msg) {
-        assert(err, "adding 250KG  failed" + msg);
-    });
-    
-    db_logic.new_stock(name2, 250, function (err, msg) {
-        assert(err, "adding 250gm  failed" + msg);
-    });
-
-    db_logic.new_stock("invalid", 250, function (err, msg) {
+    db_logic.new_stock("invalid", 250, null, function (err, msg) {
         assert(!err, "item name is not correct but stock got inserted. " + msg);
     });
+    
+    var value1, value2, value3;
+    // Insert some correct values to run tests.
+    db_logic.new_stock(name1, 450, null,  function (err, msg) {
+        assert(err, "adding 450 gm failed. " + msg);
+        value1 += 450;
+    });
+    
+
+    db_logic.new_stock(name1, 1, null,  function (err, msg) {
+        assert(err, "adding 1 gm failed" + msg);
+        value1 += 1;
+    });
+
+    db_logic.new_stock(name2, 250000, null,  function (err, msg) {
+        assert(err, "adding 250KG  failed" + msg);
+        value2 += 250000;
+    });
+
+    db_logic.new_stock(name3, 250, null,  function (err, msg) {
+        assert(err, "adding 250gm  failed" + msg);
+        value3 += 250;
+    });
+    
+    db_logic.new_stock(name3, 119876, null,  function (err, msg) {
+        assert(err, "adding 1 gm failed" + msg);
+        value3 += 119876;
+    });
+    
+    db_logic.new_stock(name1, 250000, null, function (err, msg) {
+        assert(err, "adding 250KG  failed" + msg);
+        value1 += 250000;
+    });
+    
+    db_logic.new_stock(name2, 250, '2014-01-01 12-30-42',  function (err, msg) {
+        assert(err, "adding 250gm  failed" + msg);
+        // Dont include this in the count.
+    });
+
 }
 
 

@@ -139,7 +139,11 @@ function get_item_list(callback) {
     return;
 }
 
-function insert_incoming_stocks(name, quantity, callback) {
+function isDate (date) {
+    return ((new Date(date)).toString() !== "Invalid Date") ? true : false;
+}
+
+function insert_incoming_stocks(name, quantity, when, callback) {
     if (typeof quantity !== "number") {
         verbose(format("quantity is not numeric insted it is %s", typeof quantity));
         process.nextTick(function () {
@@ -155,6 +159,14 @@ function insert_incoming_stocks(name, quantity, callback) {
         });
         return;
     }
+
+/*  TODO: Validate the date input.
+    if ((null !== when) && (isDate(when) == false)) {
+        console.error("date '%s' is not in the correct format", when);
+        callback(true, format("date '%s' is not in the correct format", when));
+        return;
+    }
+*/
     get_item_id(name, function (err, id){
         if (err) {
             var msg = format("item name '%s' is invalid.", name);
@@ -162,8 +174,9 @@ function insert_incoming_stocks(name, quantity, callback) {
             callback(true, msg);
             return;
         }
-        var stmt; 
-        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, db.db_date_now());
+        var stmt;
+        var d = (when === null) ? db.db_date_now() : when;
+        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, d);
         verbose(stmt);
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
@@ -176,6 +189,8 @@ function insert_incoming_stocks(name, quantity, callback) {
         });
     })
 }
+
+
 
 module.exports = {
     build_tables: create_tables,
