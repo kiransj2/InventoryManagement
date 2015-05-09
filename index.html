@@ -11,6 +11,7 @@
             }
         </script>
 
+        <!-- My Code -->
         <script type="text/javascript">
             function add_new_item() {
                 set_data_section(document.getElementById('new_item').innerHTML);
@@ -47,8 +48,29 @@
                         o.text = obj[i].name;
                         x.options.add(o);
                     }
-                    x.innerHTML = "<option disabled selected> -- select an option -- </option>" + x.innerHTML;
+                    x.innerHTML = "<option disabled selected> -- choose an item -- </option>" + x.innerHTML;
                     set_data_section(document.getElementById('incoming_stock').innerHTML);
+                });
+            }
+
+            function add_outgoing_stock() {
+                db_get_all_items(function (err, obj) {
+                    if (err) {
+                        set_data_section("unable to load item list due to error '" + obj + "'");
+                        return;
+                    }
+                    var x = document.getElementById("itemlist_outgoing");
+                    // Clear the existings element from the options
+                    // and then add the new options values.
+                    x.innerHTML = "";
+                    for (var i = 0; i < obj.length; i++) {
+                        var o = document.createElement('option');
+                        o.value = obj[i].name;
+                        o.text = obj[i].name;
+                        x.options.add(o);
+                    }
+                    x.innerHTML = "<option disabled selected> - choose an item to sell - </option>" + x.innerHTML;
+                    set_data_section(document.getElementById('outgoing_stock').innerHTML);
                 });
             }
         </script>
@@ -68,12 +90,12 @@
         <hr />
         <a onclick="add_new_item()" href="javascript:void(0);">Add New Item</a><br>
         <a onclick="add_incoming_stock()" href="javascript:void(0);">Add Incoming Stock</a><br>
-        <a onclick="jsfunction('add_outgoing_item')" href="javascript:void(0);">Add outgoing item</a><br>
+        <a onclick="add_outgoing_stock()" href="javascript:void(0);">Add outgoing item</a><br>
         <hr />
     </div>
 
     <div id="data">
-        <p> This part will have data </p>
+
     </div>
 
     <div id="footer">
@@ -157,7 +179,7 @@
 
                 <h1> Incoming Stocks </h1>
                 <select id="itemlist" name="itemlist" required></select>
-                <input type="number" step="0.01" min="0"
+                <input type="number" step="0.001" min="0"
                        max="2500" name='quantity' id='tags'
                        placeholder="quantity in Kgs"
                        required />
@@ -167,5 +189,56 @@
         </div>
     </div>
 
+    <!--This part contains the outgoing stocks UI Hidden by default. -->
+    <div id="outgoing_stock" style="display: none;">
+        <script type="text/javascript">
+            function validate_incoming_stock_data() {
+                var item = document.forms['outgoing_stock']['itemlist_outgoing'].value;
+                var reason = document.forms['outgoing_stock']['outgoing_reason'].value;
+                var quantity = document.forms['incoming_stock']['quantity'].value;
+                alert(reason);
+                return true;
+            }
+
+            function outgoing_stock_action() {
+                var name = document.forms['outgoing_stock']['itemlist'].value;
+                var quantity = document.forms['outgoing_stock']['quantity'].value;
+                var r = window.confirm("Please confirm to add " + quantity + " KGs of '" + name + "' to database ?");
+                if (r == false) {
+                    return;
+                }
+
+                db_send_stock(name, quantity * 1000, function (error, msg) {
+                    if (error === false) {
+                        document.getElementById('data').innerHTML = "Added Item <b>" + msg + "</b>";
+                    } else {
+                        document.getElementById('data').innerHTML = "Error: Item <b>" + msg + "</b> in Database";
+                    }
+                });
+            }
+        </script>
+        <div class="input_form">
+            <form name='outgoing_stock'
+                  action='javascript:outgoing_stock_action()'
+                  onsubmit='return validate_incoming_stock_data()'>
+
+                <h1> Outogin Stocks </h1>
+                <select id="itemlist_outgoing" name="itemlist" required></select>
+                <input type="number" step="0.001" min="0"
+                       max="2500" name='quantity' id='tags'
+                       placeholder="quantity in Kgs"
+                       required />
+                <select name="outgoing_reason" required>
+                    <option disabled selected> -- select outgoing reason -- </option>
+                    <option>Hotel</option>
+                    <option>Distributor</option>
+                    <option>LocalSale</option>
+                    <option>Others</option>
+                </select>
+                <br /><br />
+                <input type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
 </body>
 </html>

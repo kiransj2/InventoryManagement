@@ -185,13 +185,13 @@ function insert_incoming_stocks(name, quantity, when, callback) {
         return;
     }
     
-    
-    if ((null !== when) && moment(when, "YYYY-MM-DD").isvalid()) {
+  
+    if ((null !== when) && !moment(when, "YYYY-MM-DD").isValid()) {
         console.error("date '%s' is not in the correct format", when);
         callback(true, format("date '%s' is not in the correct format", when));
         return;
     }
-
+ 
     get_item_id(name, function (err, id){
         if (err) {
             var msg = format("item name '%s' is invalid.", name);
