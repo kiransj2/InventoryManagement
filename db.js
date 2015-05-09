@@ -2,21 +2,28 @@
 
 var fs = require("fs"),
     sqlite3 = require("sqlite3").verbose(),
-    util = require('util'); 
+    util = require('util'),
+    moment = require('moment');
 
 // Global Variables
 var db;
-var repository = "./mydb.db";
+var repository = "./db/mydb.db";
 
 function db_set_db_path(path) {
     repository = path;
 }
 
 // time_now function is used to get the cur_time 
-function date_now() {
-    var date = new Date();
-    var str = util.format("%d-%d-%d %d-%d-%d", date.getFullYear(), date.getMonth()+1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds());
-    return str;
+function date_time() {
+    return moment().format('HH-mm-ss');
+}
+
+function  format_user_date(date) {
+    return moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD');
+}
+
+function date_date() {
+    return moment().format('YYYY-MM-DD');
 }
 
 function build_date(year, month, day) {
@@ -55,7 +62,7 @@ function db_status() {
 }
 
 function db_execute_query(query, callback) {
-    //Log the query being Executed here
+    //todo: Log the query being Executed here
     db.all(query, callback);
     return;
 }
@@ -100,9 +107,10 @@ module.exports = {
     db_set_path: db_set_db_path,
     db_exit: db_close,
     db_new_table: db_create_table,
-    db_date_now: date_now,
-    db_date: build_date,
+    db_time: date_time,
+    db_date: date_date,
     db_execute_query: db_execute,
+    format_user_date: format_user_date,
 };
 
 

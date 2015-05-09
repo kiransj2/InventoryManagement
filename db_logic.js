@@ -1,24 +1,44 @@
 "use strict";
 var db = require("./db");
 var util = require("util");
+var moment = require('moment');
 
+var format = util.format;
 var verbose = 0;
+
+function log(msg) {
+    if (verbose) {
+        console.error(msg);
+    }
+}
 function create_tables(callback) {
     var create_items_table =  
                 "CREATE TABLE Items( " + 
-                "id integer PRIMARY KEY autoincrement, " +
+                "item_id integer PRIMARY KEY autoincrement, " +
                 "name varchar(255) NOT NULL," +
-                "dt datetime NOT NULL default (datetime('now'))," +
+                "dt date NOT NULL default (date('now', 'localtime'))," +
+                "tm time NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
                 "UNIQUE (name));";
 
     var create_incoming_stock_table = 
                 "CREATE TABLE incoming_stocks("+
-                "id integer primary key,"+
+                "transaction_id integer PRIMARY KEY autoincrement,"+
+                "item_id integer NOT NULL,"+
                 "quantity integer NOT NULL,"+
-                "dt datetime  NOT NULL default (datetime('now')),"+
-                "FOREIGN KEY (ID) REFERENCES Items(id));";
+                "dt date  NOT NULL default (date('now', 'localtime'))," +
+                "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
+                "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
+
+    var create_incoming_stocks_view = 
+                "CREATE VIEW incoming_stocks_view AS " +
+                "select stocks.item_id as item_id, name, SUM(quantity) as sum, stocks.dt as dt " +
+                "from incoming_stocks as stocks " +
+                "JOIN Items as items " +
+                "ON stocks.item_id = items.item_id " +
+                "group by name, stocks.item_id, stocks.dt " +
+                "order by dt DESC;";
     
-    var table_count = 2, error_count = 0;      
+    var table_count = 3, error_count = 0;      
     db.db_new_table(create_items_table, function (err) {
         table_count--;
         if (err) {
@@ -34,16 +54,27 @@ function create_tables(callback) {
         table_count--;
         if (err) {
             error_count++;
-            console.error("Error creating incoming_stock table");            
-        }
-        if (!table_count) {
+            console.error("Error creating incoming_stock table");
             callback(error_count);
+        }
+        else {
+            db.db_new_table(create_incoming_stocks_view, function (err) {
+                table_count--;
+                if (err) {
+                    error_count++;
+                    console.error("Error creating incoming_stock view");
+                }
+                if (!table_count) {
+                    callback(error_count);
+                }
+            });
         }
     });
 }
 
 function validate_item_name(name) {
     if (name === "") return false;
+    if (name.length < 5) return false;
     var letter = /^[0-9a-zA-Z_\-]+$/;
     if (letter.test(name)) {
         return true;
@@ -55,24 +86,22 @@ function validate_item_name(name) {
 }
 
 function insert_item_name(name, callback) {
-    if (!validate_item_name(name)) {
-        if (verbose) {
-            console.error("'" + name + "' does not meet the requirements");
-        }
+    if (!validate_item_name(name)) {        
+        log("'" + name + "' does not meet the requirements");      
         process.nextTick(function () {
             callback(true, "name'" + name + "' does not meet the requirements");
             return;
         });
         return;
     } else {
-        var stmt = util.format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_date_now());
+        var stmt = format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_date());
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
                 console.error("Insert operation for name '" + name + "' failed due to " + err);
                 callback(true, "Insert operation failed");
                 return;
             }
-            callback(false);
+            callback(false, "done");
             return;
         });
     }
@@ -80,7 +109,7 @@ function insert_item_name(name, callback) {
 }
 
 function get_item_name(id, callback) {
-    var stmt = util.format("SELECT name FROM ITEMS WHERE id = %d", id);
+    var stmt = format("SELECT name FROM ITEMS WHERE item_id = %d", id);
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             callback(true, "Invalid id=" + id + ".");
@@ -100,16 +129,16 @@ function get_item_name(id, callback) {
 }
 
 function get_item_id(name, callback) {
-    var stmt = util.format("SELECT id FROM ITEMS WHERE name = '%s'", name);
+    var stmt = format("SELECT item_id FROM ITEMS WHERE name = '%s'", name);
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             callback(true, "Invalid id=" + id + ".");
             return;
         }
         if (rows.length == 1) {            
-            callback(false, rows[0].id);
+            callback(false, rows[0].item_id);
         } else if (rows.length == 0) {
-            console.error("No Element with name='%s' found in db", name);
+            log(format("No Element with name='%s' found in db", name));
             callback(true, "No Element with name='" + name + "' found in db");
         } else {
             console.error("more than 1 id(%d) exists for name = '%s'", rows.length, name);
@@ -120,7 +149,8 @@ function get_item_id(name, callback) {
 }
 
 function get_item_list(callback) {
-    var stmt = util.format("SELECT id, name, dt FROM ITEMS");
+    var stmt = format("SELECT item_id, name, dt FROM ITEMS");
+    log(stmt);
     db.db_execute_query(stmt, function(err, rows) {
         if(err) {
             console.error("Query operation to fetch item list failed");
@@ -133,50 +163,74 @@ function get_item_list(callback) {
     return;
 }
 
-var test = 0;
-if (test) {
-    if (!db.db_init(true)) {
-        console.error("Unable to open database file");
-        process.exit(1);
+function isDate (date) {
+    return ((new Date(date)).toString() !== "Invalid Date") ? true : false;
+}
+
+function insert_incoming_stocks(name, quantity, when, callback) {
+    log(format("%s ---> %s", name, quantity));
+    if (typeof quantity !== "number") {
+        log(format("quantity is not numeric insted it is %s", typeof quantity));
+        process.nextTick(function () {
+            callback(true, "quantity is not numeric value");
+        });
+        return;
     }
-    insert_item_name("kiran", function (err) {
-        if (err) {
-            console.error("failed to insert name");
-        }
-        else {
-            console.log("Inserted name")
-        }
-    });
+    // Min of 1 gm and max of 250KG
+    if ((quantity < 1) || (quantity > 2500000)) {
+        log("quantity is not in range of 1gm to 2500KG");
+        process.nextTick(function () {
+            callback(true, "quantity is not in range of 1gm to 250KG");
+        });
+        return;
+    }
     
-    get_item_list(function (err, rows) {
+  
+    if ((null !== when) && !moment(when, "YYYY-MM-DD").isValid()) {
+        console.error("date '%s' is not in the correct format", when);
+        callback(true, format("date '%s' is not in the correct format", when));
+        return;
+    }
+ 
+    get_item_id(name, function (err, id){
         if (err) {
-            console.error("get_item_list() failed");
+            var msg = format("item name '%s' is invalid.", name);
+            log(msg);
+            callback(true, msg);
             return;
         }
-        console.log("Number of rows : %d", rows.length);
-        for (var i = 0; i < rows.length; i++) {
-            console.log("%d --> %s --> %s", rows[i].id, rows[i].name, rows[i].dt);
-        }
-    });
-    
-    var i_id = 4;
-    get_item_name(i_id, function (err, name) {
-        if (err) {
-            console.error("failed to get name");
-        } else {
-            console.log("Item name = %s, id = %d", name, i_id);
-        }
-    });
+        var stmt;
+        var d = (when === null) ? db.db_date() : db.format_user_date(when);
+        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, d);
+        log(stmt);
+        db.db_execute_query(stmt, function (err, rows) {
+            if (err) {
+                console.error("Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err);
+                callback(true, "Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err);
+                return;
+            }
+            callback(false, format("Added %d gms of item %s to db.", quantity, name));
+            return;
+        });
+    })
+}
 
-    get_item_id("B_flower", function (err, id) {
-        if (err) {
-            console.error("failed to get id");
-        } else {
-            console.log("Item name = %s, id = %d", "B_flower", id);
-        }
-    });
+function get_all_incoming_stock_on(when, callback) {
+    var date = moment(when, "YYYY-MM-DD").format("YYYY-MM-DD");
+    var stmt = format("select * from incoming_stocks_view where dt = '%s'", date);
+    log(stmt);
 
-    db.db_exit();
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            console.error("Query operation to fetch item list failed %s", err);
+            callback(true, "Query operation to fetch item list failed");
+            return;
+        }
+        log(format("rows.length = %d", rows.length));
+        callback(false, rows);
+        return;
+    });
+    return;
 }
 
 
@@ -187,4 +241,6 @@ module.exports = {
     item_id: get_item_id,
     item_name: get_item_name,
     item_list: get_item_list,
+    new_stock: insert_incoming_stocks,
+    get_all_incoming_stock_on: get_all_incoming_stock_on,
 };

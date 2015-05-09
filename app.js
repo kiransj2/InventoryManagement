@@ -20,6 +20,71 @@ app.get('/res/*', function(req, res) {
     res.sendFile(__dirname + '/res/' + req.params[0]);
 });
 
+app.get('/api/get_item_list', function (req, res) {
+    console.log("get_item_list --> ");
+    
+    db_logic.item_list(function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
+});
+
+app.get('/api/get_incoming_stocks', function (req, res) {
+    console.log("get_incoming_stocks --> %s", req.query.date);
+    db_logic.get_all_incoming_stock_on(req.query.date, function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
+});
+
+app.get('/api/add_item', function (req, res) {
+    db_logic.new_item(req.query.name, function (error, msg) {
+        if (error === true) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end("could not add " + req.query.name + " to db");
+            console.log("cound not add element " + req.query.name + " to db due to " + msg);
+            return;
+        } else {
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end("added item " + req.query.name + " to db");
+            console.log("added item " + req.query.name + " to db");
+        }
+        return;
+    });
+});
+
+app.get('/api/add_stock', function (req, res) {
+    console.log("add stock %s --> %d gm", req.query.name, req.query.quantity);
+    db_logic.new_stock(req.query.name, parseInt(req.query.quantity), null, function (error, msg) {
+        if (error === true) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(msg);
+            console.log(msg);
+            return;
+        } else {
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(msg);
+            console.log("added item " + req.query.name + " to db");
+        }
+        return;
+    });
+
+});
+
 http.listen(80, function(){
     console.log("listening on http://%s:80", hostname);
 });

@@ -37,7 +37,7 @@
 .TColor tr:nth-child(even){background: #dae5f4;}
 .TColor th { padding: 5px;border: 1px solid black;border-collapse: collapse}
 
-.new_item_form {
+.input_form {
     padding: 30px;
     width: 274px;
     background-color: #E1D7D7;
@@ -46,13 +46,13 @@
     overflow: hidden;
 }
 
-.new_item_form h1 {
+.input_form h1 {
   font-weight: 100;
   text-align: center;
   font-size: 25px;
 }
 
-.new_item_form input[type=submit] {
+.input_form input[type=submit] {
     width: 100%;  
     position: relative;
     border : solid 1px #e6e6e6;
@@ -62,11 +62,31 @@
     color : #696869;    
 }
 
-.new_item_form input[type=text] {
+.input_form input[type=text] {
   height: 44px;
   font-size: 16px;
   width: 100%;
   margin-bottom: 10px;
   padding: 0 8px;   
   box-sizing: border-box;
+}
+
+.input_form input[type=number] {
+  height: 44px;
+  font-size: 16px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 0 8px;   
+  box-sizing: border-box;
+}
+
+
+.input_form select {
+  height: 40px;
+  font-size: 16px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 0 0px;   
+  box-sizing: border-box;
+  text-align:center;
 }
