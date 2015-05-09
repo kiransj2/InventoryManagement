@@ -76,18 +76,17 @@ function db_add_stock(name, quantity, callback) {
     var url = "/api/add_stock?name=" + name + "&quantity=" + quantity;
     ajaxRequest(url, function (error, data) {
         if (error == true) {
-            callback(true, name + " already exists");
+            callback(true, "unable to add stock to database");
             return;
         }
-        callback(false, "added " + quantity + "gms of item '" + name + "' to database");
+        callback(false, "added " + (quantity/1000) + "kgs of item '" + name + "' to database");
     });
 }
 
 function get_incoming_stocks_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Number</th><th>Quantity</th><th>Added On</th></tr>";
+    var table = "<table class='TColor'><tr><th>Item Name</th><th>Quantity in KG</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        table += "<tr><td>" + rows[i].item_id + "</td><td>" + rows[i].sum +
-                                 "</td><td>" + rows[i].dt + "</td></tr>";
+        table += "<tr><td>" + rows[i].name + "</td><td>" + (rows[i].sum/1000) + "</td><td>" + rows[i].dt + "</td></tr>";
     }
     table += "</table>";
     return table;

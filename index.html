@@ -134,12 +134,12 @@
             function incoming_stock_action() {
                 var name = document.forms['incoming_stock']['itemlist'].value;
                 var quantity = document.forms['incoming_stock']['quantity'].value;
-                var r = window.confirm("Please confirm to add " + quantity + " gms of '" + name + "' to database ?");
+                var r = window.confirm("Please confirm to add " + quantity + " KGs of '" + name + "' to database ?");
                 if (r == false) {
                     return;
                 }
                 
-                db_add_stock(name, quantity, function (error, msg) {
+                db_add_stock(name, quantity*1000, function (error, msg) {
                     if (error === false) {
                         document.getElementById('data').innerHTML = "Added Item <b>" + msg + "</b>";
                     } else {
@@ -155,9 +155,9 @@
 
                 <h1> Incoming Stocks </h1>
                 <select id="itemlist" name="itemlist" required></select>
-                <input type="number" class="required" min="1"
-                       max="250000" name='quantity' id='tags'
-                       placeholder="quantity in gms"
+                <input type="number" step="0.01" min="0"
+                       max="2500" name='quantity' id='tags'
+                       placeholder="quantity in Kgs"
                        required />
                 <br /><br />
                 <input type="submit" value="Submit" />

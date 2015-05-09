@@ -3,7 +3,7 @@ var db = require("./db");
 var util = require("util");
 
 var format = util.format;
-var verbose = 1;
+var verbose = 0;
 
 function log(msg) {
     if (verbose) {
@@ -196,13 +196,16 @@ function insert_incoming_stocks(name, quantity, when, callback) {
 }
 
 function get_all_incoming_stock_on(when, callback) {
-    var stmt = format("SELECT item_id, SUM(quantity) as sum, dt FROM incoming_stocks " +
-                      "where (dt == '%s') group by item_id order by item_id ASC", when);
+    var stmt = format("SELECT stocks.item_id, name, SUM(quantity) as sum, stocks.dt as dt "+
+                      "FROM incoming_stocks as stocks " +
+                      "JOIN items as items " +
+                      "ON stocks.item_id = items.item_id " +
+                      "where (stocks.dt == '%s') group by name, stocks.item_id order by stocks.item_id ASC", when);
     log(stmt);
 
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
-            console.error("Query operation to fetch item list failed");
+            console.error("Query operation to fetch item list failed %s", err);
             callback(true, "Query operation to fetch item list failed");
             return;
         }
@@ -222,5 +225,5 @@ module.exports = {
     item_name: get_item_name,
     item_list: get_item_list,
     new_stock: insert_incoming_stocks,
-    get_all_incoming_stock_on: get_all_incoming_stock_on
+    get_all_incoming_stock_on: get_all_incoming_stock_on,
 };
