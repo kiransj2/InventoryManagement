@@ -197,6 +197,7 @@
                 var option = document.forms['outgoing_stock']['outgoing_option'].value;
                 var quantity = document.forms['outgoing_stock']['quantity'].value;
                 var reason = document.forms['outgoing_stock']['reason'].value;
+                var price = document.forms['outgoing_stock']['price'].value;
                 return true;
             }
 
@@ -205,8 +206,10 @@
                 var option = document.forms['outgoing_stock']['outgoing_option'].value;
                 var quantity = document.forms['outgoing_stock']['quantity'].value;
                 var reason = document.forms['outgoing_stock']['reason'].value;
+                var price = document.forms['outgoing_stock']['price'].value;
 
-                var r = window.confirm("Please confirm to Sell " + quantity + " KGs of '" + name + "' to " + option);
+                var r = window.confirm("Please confirm to Sell " + quantity + " KGs of '" +
+                                        name + "' to " + option + "at Rs " + price);
                 if (r == false) {
                     return;
                 }
@@ -215,7 +218,7 @@
                 obj.option = option;
                 obj.quantity = quantity*1000;
                 obj.reason = reason;
-
+                obj.price = price;
 
                 db_sell_stock(obj, function (error, msg) {
                     if (error === false) {
@@ -236,6 +239,10 @@
                 <input type="number" step="0.001" min="0"
                        max="2500" name='quantity' id='tags'
                        placeholder="quantity in Kgs"
+                       required />
+                <input type="number" step="1" min="10"
+                       max="100000" name='price' id='tags'
+                       placeholder="price in Rupees"
                        required />
                 <select name="outgoing_option" required>
                     <option disabled selected> -- select outgoing reason -- </option>

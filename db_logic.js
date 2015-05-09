@@ -44,6 +44,7 @@ function create_tables(callback) {
                 "transaction_type VARCHAR," +
                 "item_id INTEGER NOT NULL," +
                 "quantity INTEGER NOT NULL," +
+                "price INTEGER NOT NULL," +
                 "reason VARCHAR," +
                 "dt date  NOT NULL default (date('now', 'localtime'))," +
                 "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
@@ -265,6 +266,14 @@ function insert_outgoing_stocks(obj, callback) {
         });
         return;
     }
+    
+    if (typeof obj.price !== "number") {
+        log(format("price is not numeric insted it is %s", typeof quantity));
+        process.nextTick(function () {
+            callback(true, "price is not numeric value");
+        });
+        return;
+    }
 
     if ((null !== obj.when) && !moment(obj.when, "YYYY-MM-DD").isValid()) {
         log(format("date '%s' is not in the correct format", obj.when));
@@ -281,8 +290,8 @@ function insert_outgoing_stocks(obj, callback) {
         }
         var stmt;
         var d = (obj.when === null) ? db.db_date() : db.format_user_date(obj.when);
-        stmt = format("INSERT INTO outgoing_stocks(transaction_type, item_id, quantity, reason, dt)"+
-                      "values('%s', %d, %d, '%s', '%s'); ", obj.option, id, obj.quantity, obj.reason, d);
+        stmt = format("INSERT INTO outgoing_stocks(transaction_type, item_id, quantity, price, reason, dt)"+
+                      "values('%s', %d, %d, %d, '%s', '%s'); ", obj.option, id, obj.quantity, obj.price, obj.reason, d);
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
