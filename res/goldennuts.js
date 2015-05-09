@@ -114,3 +114,7 @@ function db_get_incoming_stocks_ui(date, callback) {
         callback(data);
     });
 }
+
+function db_sell_stock(obj, callback) {
+    alert(JSON.stringify(obj));
+}
