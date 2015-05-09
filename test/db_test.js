@@ -11,11 +11,7 @@ var test_db_path = "db/test_db.db";
 db.db_set_path(test_db_path);
 
 function assert(cond, msg) {
-    if(cond) {
-        console.error("=================Fatal====================");
-        console.error("Error:" + msg);
-        process.exit(1);
-    }
+    console.assert(!(cond), msg);    
 }
 
 if (fs.existsSync(test_db_path)) {
@@ -87,6 +83,7 @@ function get_entries_and_check() {
         }
 
         add_new_stock_and_check(rows[0].name, rows[1].name, rows[2].name, rows[3].name);
+        add_new_sales_and_check(rows[0].name, rows[1].name, rows[2].name, rows[3].name);
     });
 }
 
@@ -182,4 +179,58 @@ function add_new_stock_and_check(name1, name2, name3, name4) {
     }
 }
 
+function add_new_sales_and_check(name1, name2, name3, name4) {
+        
+    console.log("Check for negative tests in outgoing stocks");    
+    {
+        var obj = { name: name3, option: "Distributor", quantity: 4750, reason: "To Kolar", when: '2014-1-32' };
+        db_logic.insert_outgoing_stocks(obj, function (err, msg) {
+            assert(!err, "Date is wrong and insert should have failed.");
+        });
+    }
+    
+    {
+        var obj = { name: name3, option: "Distributor", quantity: 4750, reason: "To Kolar", when: '2014-14-1' };
+        db_logic.insert_outgoing_stocks(obj, function (err, msg) {
+            assert(!err, "Date is wrong and insert should have failed. " + msg);
+        });
+    }
+    
+    {        
+        var obj = { name: name3, option: "Distributor", quantity: "kiran", reason: "To Kolar", when: '2014-1-1' };
+        db_logic.insert_outgoing_stocks(obj, function (err, msg) {
+            assert(!err, "Quantity is not number and insert should have failed");
+        });
+    }
+    
+    {
+        var obj = { name: "kiran", option: "Distributor", quantity: 4312, reason: "To Kolar", when: '2014-1-1' };
+        db_logic.insert_outgoing_stocks(obj, function (err, msg) {
+            assert(!err, "Invalid Item name but still insert was successful");
+        });
+    }
+    
 
+    {
+        var obj = { name: name1, option: "Hotel", quantity: 4312, reason: "Shanti Sagar", when: db.db_date() };
+        db_logic.insert_outgoing_stocks(obj, function (err, msg) {
+            assert(err, "Failed to insert 3.5KG sale due to error " + msg);
+        });
+    }
+        
+    {
+        var obj = { name: name3, option: "LocalSale", quantity: 1500, reason: "Consumer", when: db.db_date() };
+        db_logic.insert_outgoing_stocks(obj, function (err, msg) {
+            assert(err, "Failed to insert 4.75KG sale due to error " + msg);
+        });
+    }
+    
+    {
+        var obj = { name: name2, option: "Distributor", quantity: 4750, reason: "To Kolar", when: db.db_date() };
+        db_logic.insert_outgoing_stocks(obj, function (err, msg) {
+            assert(err, "Failed to insert 4.75KG sale due to error " + msg);
+        });
+    }
+    
+    return;
+}

@@ -37,13 +37,36 @@ function create_tables(callback) {
                 "ON stocks.item_id = items.item_id " +
                 "group by name, stocks.item_id, stocks.dt " +
                 "order by dt DESC;";
+
+    var create_outgoing_stocks_table = 
+                "CREATE TABLE outgoing_stocks(" +
+                "transaction_id INTEGER PRIMARY KEY autoincrement," +
+                "transaction_type VARCHAR," +
+                "item_id INTEGER NOT NULL," +
+                "quantity INTEGER NOT NULL," +
+                "reason VARCHAR," +
+                "dt date  NOT NULL default (date('now', 'localtime'))," +
+                "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
+                "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
+
     
-    var table_count = 3, error_count = 0;      
+    var table_count = 4, error_count = 0;      
     db.db_new_table(create_items_table, function (err) {
         table_count--;
         if (err) {
             error_count++;
             console.error("Error creating Items table");            
+        }
+        if (!table_count) {
+            callback(error_count);
+        }
+    });
+    
+    db.db_new_table(create_outgoing_stocks_table, function (err) {
+        table_count--;
+        if (err) {
+            error_count++;
+            console.error("Error creating outgoing stocks table");
         }
         if (!table_count) {
             callback(error_count);
@@ -187,12 +210,12 @@ function insert_incoming_stocks(name, quantity, when, callback) {
     
   
     if ((null !== when) && !moment(when, "YYYY-MM-DD").isValid()) {
-        console.error("date '%s' is not in the correct format", when);
+        log(format("date '%s' is not in the correct format", when));
         callback(true, format("date '%s' is not in the correct format", when));
         return;
     }
  
-    get_item_id(name, function (err, id){
+    get_item_id(name, function (err, id) {
         if (err) {
             var msg = format("item name '%s' is invalid.", name);
             log(msg);
@@ -212,7 +235,7 @@ function insert_incoming_stocks(name, quantity, when, callback) {
             callback(false, format("Added %d gms of item %s to db.", quantity, name));
             return;
         });
-    })
+    });
 }
 
 function get_all_incoming_stock_on(when, callback) {
@@ -233,6 +256,47 @@ function get_all_incoming_stock_on(when, callback) {
     return;
 }
 
+function insert_outgoing_stocks(obj, callback) {
+
+    if (typeof obj.quantity !== "number") {
+        log(format("quantity is not numeric insted it is %s", typeof quantity));
+        process.nextTick(function () {
+            callback(true, "quantity is not numeric value");
+        });
+        return;
+    }
+
+    if ((null !== obj.when) && !moment(obj.when, "YYYY-MM-DD").isValid()) {
+        log(format("date '%s' is not in the correct format", obj.when));
+        callback(true, format("date '%s' is not in the correct format", obj.when));
+        return;
+    }
+
+    get_item_id(obj.name, function (err, id) {
+        if (err) {
+            var msg = format("item name '%s' is invalid.", obj.name);
+            log(msg);
+            callback(true, msg);
+            return;
+        }
+        var stmt;
+        var d = (obj.when === null) ? db.db_date() : db.format_user_date(obj.when);
+        stmt = format("INSERT INTO outgoing_stocks(transaction_type, item_id, quantity, reason, dt)"+
+                      "values('%s', %d, %d, '%s', '%s'); ", obj.option, id, obj.quantity, obj.reason, d);
+        log(stmt);
+        db.db_execute_query(stmt, function (err, rows) {
+            if (err) {
+                var str = format("Failed to insert outgoing stocks of %d gms of item %s failed due to %s",
+                                  obj.quantity, obj.name, err);
+                console.error(str);
+                callback(true, str);
+                return;
+            }
+            callback(false, format("Sold %d gms of item %s to %s.", obj.quantity, obj.name, obj.option));
+            return;
+        });
+    });
+}
 
 
 module.exports = {
@@ -243,4 +307,5 @@ module.exports = {
     item_list: get_item_list,
     new_stock: insert_incoming_stocks,
     get_all_incoming_stock_on: get_all_incoming_stock_on,
+    insert_outgoing_stocks: insert_outgoing_stocks
 };
