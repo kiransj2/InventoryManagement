@@ -1,6 +1,7 @@
 "use strict";
 var db = require("./db");
 var util = require("util");
+var moment = require('moment');
 
 var format = util.format;
 var verbose = 0;
@@ -27,8 +28,17 @@ function create_tables(callback) {
                 "dt date  NOT NULL default (date('now', 'localtime'))," +
                 "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
                 "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
+
+    var create_incoming_stocks_view = 
+                "CREATE VIEW incoming_stocks_view AS " +
+                "select stocks.item_id as item_id, name, SUM(quantity) as sum, stocks.dt as dt " +
+                "from incoming_stocks as stocks " +
+                "JOIN Items as items " +
+                "ON stocks.item_id = items.item_id " +
+                "group by name, stocks.item_id, stocks.dt " +
+                "order by dt DESC;";
     
-    var table_count = 2, error_count = 0;      
+    var table_count = 3, error_count = 0;      
     db.db_new_table(create_items_table, function (err) {
         table_count--;
         if (err) {
@@ -44,10 +54,20 @@ function create_tables(callback) {
         table_count--;
         if (err) {
             error_count++;
-            console.error("Error creating incoming_stock table");            
-        }
-        if (!table_count) {
+            console.error("Error creating incoming_stock table");
             callback(error_count);
+        }
+        else {
+            db.db_new_table(create_incoming_stocks_view, function (err) {
+                table_count--;
+                if (err) {
+                    error_count++;
+                    console.error("Error creating incoming_stock view");
+                }
+                if (!table_count) {
+                    callback(error_count);
+                }
+            });
         }
     });
 }
@@ -157,21 +177,21 @@ function insert_incoming_stocks(name, quantity, when, callback) {
         return;
     }
     // Min of 1 gm and max of 250KG
-    if ((quantity < 1) || (quantity > 250000)) {
-        log("quantity is not in range of 1gm to 250KG");
+    if ((quantity < 1) || (quantity > 2500000)) {
+        log("quantity is not in range of 1gm to 2500KG");
         process.nextTick(function () {
-            callback(true, "quantity is not in range of 1gm to 250KG");            
+            callback(true, "quantity is not in range of 1gm to 250KG");
         });
         return;
     }
-
-/*  TODO: Validate the date input.
-    if ((null !== when) && (isDate(when) == false)) {
+    
+    
+    if ((null !== when) && moment(when, "YYYY-MM-DD").isvalid()) {
         console.error("date '%s' is not in the correct format", when);
         callback(true, format("date '%s' is not in the correct format", when));
         return;
     }
-*/
+
     get_item_id(name, function (err, id){
         if (err) {
             var msg = format("item name '%s' is invalid.", name);
@@ -180,7 +200,7 @@ function insert_incoming_stocks(name, quantity, when, callback) {
             return;
         }
         var stmt;
-        var d = (when === null) ? db.db_date() : when;
+        var d = (when === null) ? db.db_date() : db.format_user_date(when);
         stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, d);
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
@@ -196,11 +216,8 @@ function insert_incoming_stocks(name, quantity, when, callback) {
 }
 
 function get_all_incoming_stock_on(when, callback) {
-    var stmt = format("SELECT stocks.item_id, name, SUM(quantity) as sum, stocks.dt as dt "+
-                      "FROM incoming_stocks as stocks " +
-                      "JOIN items as items " +
-                      "ON stocks.item_id = items.item_id " +
-                      "where (stocks.dt == '%s') group by name, stocks.item_id order by stocks.item_id ASC", when);
+    var date = moment(when, "YYYY-MM-DD").format("YYYY-MM-DD");
+    var stmt = format("select * from incoming_stocks_view where dt = '%s'", date);
     log(stmt);
 
     db.db_execute_query(stmt, function (err, rows) {

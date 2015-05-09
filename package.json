@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "express": "^4.12.3",
+    "moment": "^2.10.2",
     "sqlite3": "^3.0.7"
   }
 }

@@ -2,7 +2,8 @@
 
 var fs = require("fs"),
     sqlite3 = require("sqlite3").verbose(),
-    util = require('util'); 
+    util = require('util'),
+    moment = require('moment');
 
 // Global Variables
 var db;
@@ -14,15 +15,15 @@ function db_set_db_path(path) {
 
 // time_now function is used to get the cur_time 
 function date_time() {
-    var date = new Date();
-    var str = util.format("%d-%d-%d", date.getFullYear(), date.getMonth()+1, date.getDate());
-    return str;
+    return moment().format('HH-mm-ss');
+}
+
+function  format_user_date(date) {
+    return moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD');
 }
 
 function date_date() {
-    var date = new Date();
-    var str = util.format("%d-%d-%d", date.getFullYear(), date.getMonth() + 1, date.getDate());
-    return str;
+    return moment().format('YYYY-MM-DD');
 }
 
 function build_date(year, month, day) {
@@ -109,6 +110,7 @@ module.exports = {
     db_time: date_time,
     db_date: date_date,
     db_execute_query: db_execute,
+    format_user_date: format_user_date,
 };
 
 

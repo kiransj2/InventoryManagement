@@ -92,8 +92,8 @@ function get_incoming_stocks_from_json_ui(rows) {
     return table;
 }
 
-function db_get_incoming_stocks(callback) {
-    ajaxRequest("/api/get_incoming_stocks", function (error, data) {
+function db_get_incoming_stocks(date, callback) {    
+    ajaxRequest("/api/get_incoming_stocks?date="+date, function (error, data) {
         if (error == true) {
             callback(false, "Unablet to get incoming stocks");
             return;
@@ -103,8 +103,8 @@ function db_get_incoming_stocks(callback) {
     });
 }
 
-function db_get_incoming_stocks_ui(callback) {
-    db_get_incoming_stocks(function (error, rows) {
+function db_get_incoming_stocks_ui(date, callback) {
+    db_get_incoming_stocks(date, function (error, rows) {
         var data;
         if (error) {
             data = "Error '" + rows + "'";
