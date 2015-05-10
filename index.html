@@ -102,10 +102,12 @@
                     // and then add the new options values.
                     x.innerHTML = "";
                     for (var i = 0; i < obj.length; i++) {
-                        var o = document.createElement('option');
-                        o.value = obj[i].name;
-                        o.text = obj[i].name;
-                        x.options.add(o);
+                        if (obj[i].cur_stocks) {
+                            var o = document.createElement('option');
+                            o.value = obj[i].name;
+                            o.text = obj[i].name;
+                            x.options.add(o);
+                        }
                     }
                     x.innerHTML = "<option disabled selected> - choose an item to sell - </option>" + x.innerHTML;
                     set_data_section(document.getElementById('outgoing_stock').innerHTML);
@@ -269,9 +271,7 @@
                 obj.price = price;
 
                 db_sell_stock(obj, function (error, msg) {
-                    alert("Error " + error + "=" + msg);
                     if (error === false) {
-                        alert("done");
                         sweetAlert("", "Sold " + quantity + " of " + name + " to " + option, "success");
                         document.getElementById('data').innerHTML = "";
                     } else {
