@@ -163,3 +163,44 @@ function db_get_outgoing_stocks_ui(date, callback) {
         callback(data);
     });
 }
+
+
+
+function db_list_current_stocks(callback) {
+    ajaxRequest("/api/get_current_stocks", function (error, data) {
+        if (error == true) {
+            callback(false, "Unablet to get current stocks");
+            return;
+        }
+        var obj = JSON.parse(data);
+        callback(false, obj);
+    });
+}
+
+function get_current_stocks_from_json_ui(rows) {
+    var table = "<table class='TColor'><tr><th>Item Name</th><th>Current Stocks (in KGs)</th></tr>";
+    for (var i = 0; i < rows.length; i++) {
+        var weight = 0;
+        if (rows[i].cur_stocks < 1000) {
+            weight = "" + rows[i].cur_stocks + " gms";
+        } else {
+            weight = rows[i].cur_stocks / 1000;
+        }       
+        table += "<tr><td>" + rows[i].name + "</td><td>" + (weight) + "</td></tr>";
+    }
+    table += "</table>";
+    return table;
+}
+
+
+function db_list_currents_stocks_ui(callback) {
+    db_list_current_stocks(function (error, rows) {
+        var data;
+        if (error) {
+            data = "Error '" + rows + "'";
+        } else {            
+            data = get_current_stocks_from_json_ui(rows);
+        }
+        callback(data);
+    });
+}

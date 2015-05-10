@@ -62,7 +62,13 @@
                     set_data_section(table);
                 });
             }
-
+            
+            function list_current_stocks() {
+                db_list_currents_stocks_ui(function (table) {
+                    set_data_section(table);
+                });
+            }
+            
             function add_incoming_stock() {
                 db_get_all_items(function (err, obj) {
                     if (err) {
@@ -115,7 +121,7 @@
 
     <div id="navigation">
         <a onclick="list_all_items()" href="javascript:void(0);">Item List</a><br>
-        <a onclick="jsfunction('cur_stocks')" href="javascript:void(0);">Current Stocks</a><br>
+        <a onclick="list_current_stocks()" href="javascript:void(0);">Current Stocks</a><br>
         <a onclick="list_incoming_stocks()" href="javascript:void(0);">Incoming Stocks</a><br>
         <a onclick="list_outgoing_stocks()" href="javascript:void(0);">outgoing_stocks</a><br>
         <a onclick="jsfunction('daily_report')" href="javascript:void(0);">Daily Report</a><br>
@@ -222,7 +228,7 @@
                        required />
                 <input type="number" step="1" min="1"
                        max="500000" name='price' id='tags'
-                       placeholder="quantity in Kgs"
+                       placeholder="Price in Rs"
                        required />
                 <br /><br />
                 <input type="submit" value="Submit" />
@@ -287,7 +293,7 @@
                        required />
                 <input type="number" step="1" min="10"
                        max="500000" name='price' id='tags'
-                       placeholder="price in Rupees"
+                       placeholder="price in Rs"
                        required />
                 <select name="outgoing_option" required>
                     <option disabled selected> -- select outgoing reason -- </option>

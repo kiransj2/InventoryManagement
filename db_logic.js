@@ -4,7 +4,7 @@ var util = require("util");
 var moment = require('moment');
 
 var format = util.format;
-var verbose = 0;
+var verbose = 1;
 
 function log(msg) {
     if (verbose) {
@@ -422,6 +422,24 @@ function get_all_outgoing_stock_on(when, callback) {
     return;
 }
 
+function get_current_stocks(callback) {
+    var stmt = format("select * from current_stocks");
+    log(stmt);
+    
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            var msg = format("Query operation to fetch current stocks failed %s", err);
+            console.error(msg);
+            callback(true, msg);
+            return;
+        }
+        console.log("current_stocks rows.length : %d", rows.length);
+        callback(false, rows);
+        return;
+    });
+    return;
+}
+
 
 module.exports = {
     build_tables: create_tables,
@@ -436,4 +454,6 @@ module.exports = {
 
     sell_stock: insert_outgoing_stocks,
     get_all_outgoing_stock_on: get_all_outgoing_stock_on,
+
+    current_stocks: get_current_stocks,
 };

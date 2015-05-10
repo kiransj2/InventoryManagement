@@ -126,6 +126,21 @@ app.get('/api/get_outgoing_stocks', function (req, res) {
     return;
 });
 
+app.get('/api/get_current_stocks', function (req, res) {
+    console.log("get_current_stocks --> %s", req.query.date);
+    db_logic.current_stocks(function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
+});
+
 http.listen(80, function(){
     console.log("listening on http://%s:80", hostname);
 });
