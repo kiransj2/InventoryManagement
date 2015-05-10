@@ -72,8 +72,8 @@ function db_get_items_table_ui(callback) {
     });
 }
 
-function db_add_stock(name, quantity, callback) {
-    var url = "/api/add_stock?name=" + name + "&quantity=" + quantity;
+function db_add_stock(name, quantity, price, callback) {
+    var url = "/api/add_stock?name=" + name + "&quantity=" + quantity + "&price=" + price;
     ajaxRequest(url, function (error, data) {
         if (error == true) {
             callback(true, "unable to add stock to database");
@@ -84,9 +84,10 @@ function db_add_stock(name, quantity, callback) {
 }
 
 function get_incoming_stocks_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Name</th><th>Quantity in KG</th><th>date</th></tr>";
+    var table = "<table class='TColor'><tr><th>Item Name</th><th>Quantity in KG</th><th>Cost Paid</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        table += "<tr><td>" + rows[i].name + "</td><td>" + (rows[i].sum/1000) + "</td><td>" + rows[i].dt + "</td></tr>";
+        table += "<tr><td>" + rows[i].name + "</td><td>" + (rows[i].sum / 1000) + "</td><td>";
+        table += rows[i].cost + "</td><td>" + rows[i].dt + "</td></tr>";
     }
     table += "</table>";
     return table;
@@ -116,5 +117,16 @@ function db_get_incoming_stocks_ui(date, callback) {
 }
 
 function db_sell_stock(obj, callback) {
-    alert(JSON.stringify(obj));
+
+    var url = "/api/sell_stock?name=" + obj.name + "&quantity=" + obj.quantity + "&price=" + obj.price;
+    url += "&option=" + obj.option + "&reason=" + obj.reason;
+
+    ajaxRequest(url, function (error, data) {
+        if (error) {
+            callback(true, "unable to Sell stock");
+            return;
+        }
+
+        callback(false, "Sold " + (obj.quantity / 1000) + "kgs of item '" + name + "' to " + obj.option);
+    });
 }

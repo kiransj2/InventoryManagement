@@ -5,6 +5,10 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="/res/goldennuts.css" />
         <script src="/res/goldennuts.js"></script>
+
+        <!--link for messagebox http://t4t5.github.io/sweetalert/ -->
+        <script src="/res/dist/sweetalert.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/res/dist/sweetalert.css">
         <script type="text/javascript">
             function set_data_section(obj) {
                 document.getElementById('data').innerHTML = obj;
@@ -13,7 +17,27 @@
 
         <!-- My Code -->
         <script type="text/javascript">
-            function add_new_item() {
+            function confirm_action(text, callback) {
+                swal({
+                    title: "Are you sure?",
+                    text: text,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, Do it.",
+                    cancelButtonText: "No, Stop!",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        callback(true);                        
+                    } else {
+                        callback(false);
+                    }
+                });
+            }
+            function add_new_item() {                
                 set_data_section(document.getElementById('new_item').innerHTML);
             }
 
@@ -110,7 +134,7 @@
                 if (name == "") {
                     return false;
                 } else if (!validate_item_name(name)) {
-                    alert("'" + name + "' can have only alphabets,_,- and digits.");
+                    sweetAlert("", "Item name '" + name  +"' should have only Alphabets, digits, - and _.",  "error");
                     return false;
                 }
                 return true;
@@ -124,9 +148,10 @@
                 }
                 db_add_new_item(name, function (error, msg) {
                     if (error === false) {
-                        document.getElementById('data').innerHTML = "Added Item <b>" + msg + "</b> to Database";
-                    } else {
-                        document.getElementById('data').innerHTML = "Error: Item <b>" + msg + "</b> in Database";                        
+                        document.getElementById('data').innerHTML = "";
+                        sweetAlert("", "Item '" + name + "' added to database", "success");
+                    } else {                        
+                        sweetAlert("oops!", "Item '" + name + "' already exists in database!!", "error");
                     }
                 });
             }
@@ -152,20 +177,24 @@
             function validate_incoming_stock_data() {               
                 var item = document.forms['incoming_stock']['itemlist'].value;
                 var quantity = document.forms['incoming_stock']['quantity'].value;
+                var price = document.forms['incoming_stock']['price'].value;
                 return true;                
             }
 
             function incoming_stock_action() {
                 var name = document.forms['incoming_stock']['itemlist'].value;
                 var quantity = document.forms['incoming_stock']['quantity'].value;
-                var r = window.confirm("Please confirm to add " + quantity + " KGs of '" + name + "' to database ?");
+                var price = document.forms['incoming_stock']['price'].value;
+                var r = window.confirm("Please confirm to add " + quantity + " KGs of '" + name +
+                                       "' at Rs " + price + "  to database ?");
                 if (r == false) {
                     return;
                 }
                 
-                db_add_stock(name, quantity*1000, function (error, msg) {
+                db_add_stock(name, quantity*1000, price, function (error, msg) {
                     if (error === false) {
-                        document.getElementById('data').innerHTML = "Added Item <b>" + msg + "</b>";
+                        document.getElementById('data').innerHTML = "";
+                        sweetAlert("", "Added " + quantity + " KG of " + name + " to database", "success");
                     } else {
                         document.getElementById('data').innerHTML = "Error: Item <b>" + msg + "</b> in Database";
                     }
@@ -181,6 +210,10 @@
                 <select id="itemlist" name="itemlist" required></select>
                 <input type="number" step="0.001" min="0"
                        max="2500" name='quantity' id='tags'
+                       placeholder="quantity in Kgs"
+                       required />
+                <input type="number" step="1" min="1"
+                       max="500000" name='price' id='tags'
                        placeholder="quantity in Kgs"
                        required />
                 <br /><br />
@@ -208,8 +241,9 @@
                 var reason = document.forms['outgoing_stock']['reason'].value;
                 var price = document.forms['outgoing_stock']['price'].value;
 
-                var r = window.confirm("Please confirm to Sell " + quantity + " KGs of '" +
-                                        name + "' to " + option + "at Rs " + price);
+                var text = "Confirm to Sell " + quantity + " KGs of '" +
+                            name + "' to " + option + "at Rs " + price;
+                var r = window.confirm(text);
                 if (r == false) {
                     return;
                 }
@@ -221,8 +255,11 @@
                 obj.price = price;
 
                 db_sell_stock(obj, function (error, msg) {
+                    alert("Error " + error + "=" + msg);
                     if (error === false) {
-                        document.getElementById('data').innerHTML = "Sold " + quantity + "KGS of '" + name + "' to " + option;
+                        alert("done");
+                        sweetAlert("", "Sold " + quantity + " of " + name + " to " + option, "success");
+                        document.getElementById('data').innerHTML = "";
                     } else {
                         document.getElementById('data').innerHTML = "Error: Unable to sell due to " + msg;
                     }
@@ -241,7 +278,7 @@
                        placeholder="quantity in Kgs"
                        required />
                 <input type="number" step="1" min="10"
-                       max="100000" name='price' id='tags'
+                       max="500000" name='price' id='tags'
                        placeholder="price in Rupees"
                        required />
                 <select name="outgoing_option" required>

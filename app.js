@@ -3,7 +3,8 @@
     db = require('./db'),
     db_logic = require('./db_logic'),
     os = require('os'),
-    url = require('url');
+    url = require('url'),
+    util = require('util');
 
 var hostname = os.hostname();
 
@@ -68,8 +69,9 @@ app.get('/api/add_item', function (req, res) {
 });
 
 app.get('/api/add_stock', function (req, res) {
-    console.log("add stock %s --> %d gm", req.query.name, req.query.quantity);
-    db_logic.new_stock(req.query.name, parseInt(req.query.quantity), null, function (error, msg) {
+    console.log("add stock %d gm of %s at Rs %d", req.query.quantity, req.query.name, req.query.price);
+    db_logic.new_stock(req.query.name, parseInt(req.query.quantity), parseInt(req.query.price),
+                       db.db_date(), function (error, msg) {
         if (error === true) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end(msg);
@@ -79,6 +81,31 @@ app.get('/api/add_stock', function (req, res) {
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             res.end(msg);
             console.log("added item " + req.query.name + " to db");
+        }
+        return;
+    });
+});
+
+app.get('/api/sell_stock', function (req, res) {
+    var obj = {};
+    obj.price = parseInt(req.query.price);
+    obj.quantity = parseInt(req.query.quantity);
+    obj.name = req.query.name;
+    obj.option = req.query.option;
+    obj.reason = req.query.reason;
+    obj.when = db.db_date();
+
+    console.log("sell stock %s", util.inspect(obj));
+    db_logic.sell_stock(obj, function (error, msg) {
+        if (error === true) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(msg);
+            console.log(msg);
+            return;
+        } else {
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(msg);
+            console.log("Sold item " + req.query.name + ".");
         }
         return;
     });

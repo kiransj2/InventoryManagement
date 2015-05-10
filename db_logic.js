@@ -24,14 +24,15 @@ function create_tables(callback) {
                 "CREATE TABLE incoming_stocks("+
                 "transaction_id integer PRIMARY KEY autoincrement,"+
                 "item_id integer NOT NULL,"+
-                "quantity integer NOT NULL,"+
+                "quantity integer NOT NULL," +
+                "price integer NOT NULL," +
                 "dt date  NOT NULL default (date('now', 'localtime'))," +
                 "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
                 "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
 
     var create_incoming_stocks_view = 
                 "CREATE VIEW incoming_stocks_view AS " +
-                "select stocks.item_id as item_id, name, SUM(quantity) as sum, stocks.dt as dt " +
+                "select stocks.item_id as item_id, name, SUM(quantity) as sum, SUM(price) as cost, stocks.dt as dt " +
                 "from incoming_stocks as stocks " +
                 "JOIN Items as items " +
                 "ON stocks.item_id = items.item_id " +
@@ -191,7 +192,7 @@ function isDate (date) {
     return ((new Date(date)).toString() !== "Invalid Date") ? true : false;
 }
 
-function insert_incoming_stocks(name, quantity, when, callback) {
+function insert_incoming_stocks(name, quantity, price, when, callback) {
     log(format("%s ---> %s", name, quantity));
     if (typeof quantity !== "number") {
         log(format("quantity is not numeric insted it is %s", typeof quantity));
@@ -200,11 +201,29 @@ function insert_incoming_stocks(name, quantity, when, callback) {
         });
         return;
     }
+   
     // Min of 1 gm and max of 250KG
     if ((quantity < 1) || (quantity > 2500000)) {
         log("quantity is not in range of 1gm to 2500KG");
         process.nextTick(function () {
             callback(true, "quantity is not in range of 1gm to 250KG");
+        });
+        return;
+    }
+    
+    if (typeof price !== "number") {
+        log(format("price is not numeric insted it is %s", typeof quantity));
+        process.nextTick(function () {
+            callback(true, "price is not numeric value");
+        });
+        return;
+    }
+    
+    // Min of 1 gm and max of 250KG
+    if ((price < 1) || (price > 500000)) {
+        log("price is not in range of Rs 1 to 500000");
+        process.nextTick(function () {
+            callback(true, "500000 is not in range of Rs 1 to 500000");
         });
         return;
     }
@@ -225,12 +244,14 @@ function insert_incoming_stocks(name, quantity, when, callback) {
         }
         var stmt;
         var d = (when === null) ? db.db_date() : db.format_user_date(when);
-        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, dt) values(%d, %d, '%s');", id, quantity, d);
+        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, price, dt) values(%d, %d, %d, '%s');", 
+                       id, quantity, price, d);
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
-                console.error("Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err);
-                callback(true, "Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err);
+                var text = "Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err;
+                console.log(text);
+                callback(true, text);
                 return;
             }
             callback(false, format("Added %d gms of item %s to db.", quantity, name));
@@ -316,5 +337,6 @@ module.exports = {
     item_list: get_item_list,
     new_stock: insert_incoming_stocks,
     get_all_incoming_stock_on: get_all_incoming_stock_on,
+    sell_stock: insert_outgoing_stocks,
     insert_outgoing_stocks: insert_outgoing_stocks
 };

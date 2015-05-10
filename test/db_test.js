@@ -11,7 +11,10 @@ var test_db_path = "db/test_db.db";
 db.db_set_path(test_db_path);
 
 function assert(cond, msg) {
-    console.assert(!(cond), msg);    
+    if (cond) {
+        console.error(msg);
+        console.assert(!(cond), msg);
+    }
 }
 
 if (fs.existsSync(test_db_path)) {
@@ -83,70 +86,77 @@ function get_entries_and_check() {
         }
 
         add_new_stock_and_check(rows[0].name, rows[1].name, rows[2].name, rows[3].name);
-        add_new_sales_and_check(rows[0].name, rows[1].name, rows[2].name, rows[3].name);
     });
 }
 
 function add_new_stock_and_check(name1, name2, name3, name4) {
     console.log("add stocks and run tests")
-    db_logic.new_stock(name1, -1, null, function (err, msg) {
+    db_logic.new_stock(name1, -1, 10, null, function (err, msg) {
         assert(!err, "quantity is negative and no error reported." + msg);
     });
 
-    db_logic.new_stock(name1, 2500001, null,  function (err, msg) {
+    db_logic.new_stock(name1, 2500001, 10, null,  function (err, msg) {
         assert(!err, "quantity is more than 2500KG and no error reported." + msg);
     });
 
-    db_logic.new_stock(name1, "123213", null,  function (err, msg) {
+    db_logic.new_stock(name1, "123213", 10, null,  function (err, msg) {
         assert(!err, "quantity is not numeric value and no error reported." + msg);
     });
     
-    db_logic.new_stock("invalid", 250, null, function (err, msg) {
+    db_logic.new_stock("invalid", 250, 10, null, function (err, msg) {
         assert(!err, "item name is not correct but stock got inserted. " + msg);
     });
     
-    db_logic.new_stock(name3, 765, ('2015-31-7'), function (err, msg) {
-        assert(!err, "1. adding new stock with invalid date worked. " + msg);
+    db_logic.new_stock(name3, 765, 10, ('2015-31-7'), function (err, msg) {
+        assert(!err, "adding new stock with invalid date worked. " + msg);
     });
     
-    db_logic.new_stock(name3, 765, ('1-2015-7'), function (err, msg) {
-        assert(!err, "2. adding new stock with invalid date worked. " + msg);
+    db_logic.new_stock(name3, 765, 10, ('1-2015-7'), function (err, msg) {
+        assert(!err, "adding new stock with invalid date worked. " + msg);
     });
     
+    db_logic.new_stock(name3, 765, 0, ('2015-1-7'), function (err, msg) {
+        assert(!err, "adding new stock at Rs 0 passed. " + msg);
+    });
+    
+    db_logic.new_stock(name3, 765, 1000000, ('2015-1-7'), function (err, msg) {
+        assert(!err, "adding new stock at Rs 1000000 passed. " + msg);
+    });
+
     var value1 = 450 + 1 + 250000;
     var value2 = 250000;
     var value3 = 250 + 119876;
     // Insert some correct values to run tests.
-    db_logic.new_stock(name1, 450, null, function (err, msg) {
+    db_logic.new_stock(name1, 450, 500, null, function (err, msg) {
         assert(err, "adding 450 gm failed. " + msg);
     });
         
-    db_logic.new_stock(name1, 1, null, function (err, msg) {
+    db_logic.new_stock(name1, 1, 1053, null, function (err, msg) {
         assert(err, "adding 1 gm failed" + msg);
     });
         
-    db_logic.new_stock(name1, 250000, null, function (err, msg) {
+    db_logic.new_stock(name1, 250000, 75980, null, function (err, msg) {
         assert(err, "adding 250KG  failed" + msg);
     });
         
-    db_logic.new_stock(name2, 250000, null, function (err, msg) {
+    db_logic.new_stock(name2, 250000, 90000, null, function (err, msg) {
         assert(err, "adding 250KG  failed" + msg);
     });
         
-    db_logic.new_stock(name3, 250, null, function (err, msg) {
+    db_logic.new_stock(name3, 250, 300, null, function (err, msg) {
         assert(err, "adding 250gm  failed" + msg);
     });
         
-    db_logic.new_stock(name3, 119876, null, function (err, msg) {
-        assert(err, "adding 1 gm failed" + msg);
+    db_logic.new_stock(name3, 119876, 87890, null, function (err, msg) {
+        assert(err, "adding 119876 gm failed" + msg);
     });
         
-    db_logic.new_stock(name2, 250, db.format_user_date('2014-1-11'), function (err, msg) {
+    db_logic.new_stock(name2, 250, 330, db.format_user_date('2014-1-11'), function (err, msg) {
         assert(err, "adding 250gm  failed" + msg);
     // Dont include this in the count.
     });
     
-    console.log("sleep for 1.5 second so that all db function are done");
+    console.log("sleep for 2.5 second so that all db function are done before we test");
     setTimeout(function () {
         console.log("query and check the stocks inserted")
         db_logic.get_all_incoming_stock_on(db.db_date(), function (err, rows) {
@@ -163,17 +173,18 @@ function add_new_stock_and_check(name1, name2, name3, name4) {
         });
 
         add_some_entries_to_db();
-    }, 1500);
+        add_new_sales_and_check(name1, name2, name3, name4);
+    }, 2500);
     
     function add_some_entries_to_db() {
-        db_logic.new_stock(name1, 250, db.format_user_date('2014-7-11'), function (err, msg) {
+        db_logic.new_stock(name1, 250, 170, db.format_user_date('2014-7-11'), function (err, msg) {
             assert(err, "adding 250gm  failed" + msg);
         });
         
-        db_logic.new_stock(name2, 391, db.format_user_date('2015-3-1'), function (err, msg) {
+        db_logic.new_stock(name2, 391, 800, db.format_user_date('2015-3-1'), function (err, msg) {
             assert(err, "adding 391gm  failed" + msg);
         });
-        db_logic.new_stock(name3, 765, db.format_user_date('2015-3-7'), function (err, msg) {
+        db_logic.new_stock(name3, 765, 345, db.format_user_date('2015-3-7'), function (err, msg) {
             assert(err, "adding 765gm failed" + msg);
         });
     }
