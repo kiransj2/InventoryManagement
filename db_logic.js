@@ -11,7 +11,7 @@ function log(msg) {
         console.error(msg);
     }
 }
-function create_tables(callback) {
+function create_tables(client_callback) {
     var create_items_table =  
                 "CREATE TABLE Items( " + 
                 "item_id integer PRIMARY KEY autoincrement, " +
@@ -38,6 +38,12 @@ function create_tables(callback) {
                 "ON stocks.item_id = items.item_id " +
                 "group by name, stocks.item_id, stocks.dt " +
                 "order by dt DESC;";
+    
+    var create_total_incoming_stocks_view = 
+                "CREATE VIEW total_incoming_stocks_view as " +
+                "select item_id, name, SUM(sum) as quantity, SUM(cost) as price " +
+                "from incoming_stocks_view " +
+                "group by item_id ";
 
     var create_outgoing_stocks_table = 
                 "CREATE TABLE outgoing_stocks(" +
@@ -50,9 +56,53 @@ function create_tables(callback) {
                 "dt date  NOT NULL default (date('now', 'localtime'))," +
                 "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
                 "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
-
     
-    var table_count = 4, error_count = 0;      
+    var create_outgoing_stocks_view = 
+                "CREATE VIEW outgoing_stocks_view AS " +
+                "select stocks.item_id as item_id, name, SUM(quantity) as sum, SUM(price) as cost, stocks.dt as dt " +
+                "from outgoing_stocks as stocks " +
+                "JOIN Items as items " +
+                "ON stocks.item_id = items.item_id " +
+                "group by name, stocks.item_id, stocks.dt " +
+                "order by dt DESC ";
+
+    var create_total_outgoing_stock_view = 
+                "CREATE VIEW total_outgoing_stocks_view as " +
+                "select item_id, name, SUM(sum) as quantity, SUM(cost) as price " +
+                "from outgoing_stocks_view " +
+                "group by item_id";
+    
+    var create_cur_stocks_levels_view = 
+                "CREATE VIEW current_stocks as " +
+                "select incoming.item_id, incoming.name, " +
+                "SUM(incoming.quantity) - SUM(outgoing.quantity) as cur_stocks " + 
+                "from total_incoming_stocks_view as incoming " +
+                "join total_outgoing_stocks_view as outgoing on incoming.item_id = outgoing.item_id " +
+                "group by incoming.item_id " +
+                "union " +
+                "select item_id, name, quantity " +
+                "from total_incoming_stocks_view " +
+                "where item_id NOT in(SELECT item_id from total_outgoing_stocks_view) ";
+    
+    function callback(error_count) {
+        if (error_count) {
+            console.error("Some table were not created");
+            client_callback(error_count);
+            return;
+        }
+
+        db.db_new_table(create_cur_stocks_levels_view, function (err) {
+            if (err) {
+                error_count++;
+                console.error("Error creating cur_stocks_levels view");
+            }
+            client_callback(error_count);
+            return;
+        });
+    }
+
+    var table_count = 7, error_count = 0;
+    
     db.db_new_table(create_items_table, function (err) {
         table_count--;
         if (err) {
@@ -69,9 +119,27 @@ function create_tables(callback) {
         if (err) {
             error_count++;
             console.error("Error creating outgoing stocks table");
-        }
-        if (!table_count) {
             callback(error_count);
+        } else {
+            db.db_new_table(create_outgoing_stocks_view, function (err) {
+                table_count--;
+                if (err) {
+                    error_count++;
+                    console.error("Error creating outgoing_stocks view");
+                    callback(error_count);
+                } else {
+                    db.db_new_table(create_total_outgoing_stock_view, function (err) {
+                        table_count--;
+                        if (err) {
+                            error_count++;
+                            console.error("Error creating total_outgoing_stock view");
+                        }
+                        if (!table_count) {
+                            callback(error_count);
+                        }
+                    });
+                }                
+            });
         }
     });
 
@@ -88,9 +156,18 @@ function create_tables(callback) {
                 if (err) {
                     error_count++;
                     console.error("Error creating incoming_stock view");
-                }
-                if (!table_count) {
-                    callback(error_count);
+                    allback(error_count);
+                } else {
+                    db.db_new_table(create_total_incoming_stocks_view, function (err) {
+                        table_count--;
+                        if (err) {
+                            error_count++;
+                            console.error("Error creating total_incoming_stocks view");
+                        }
+                        if (!table_count) {
+                            callback(error_count);
+                        }
+                    });
                 }
             });
         }
@@ -267,8 +344,8 @@ function get_all_incoming_stock_on(when, callback) {
 
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
-            console.error("Query operation to fetch item list failed %s", err);
-            callback(true, "Query operation to fetch item list failed");
+            console.error("Query operation to fetch incoming_stocks failed %s", err);
+            callback(true, "Query operation to fetch incoming_stocks failed");
             return;
         }
         log(format("rows.length = %d", rows.length));
@@ -328,15 +405,35 @@ function insert_outgoing_stocks(obj, callback) {
     });
 }
 
+function get_all_outgoing_stock_on(when, callback) {
+    var date = moment(when, "YYYY-MM-DD").format("YYYY-MM-DD");
+    var stmt = format("select * from outgoing_stocks_view where dt = '%s'", date);
+    log(stmt);
+    
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            console.error("Query operation to fetch outgoing_stocks failed %s", err);
+            callback(true, "Query operation to fetch outgoing_stocks failed");
+            return;
+        }
+        callback(false, rows);
+        return;
+    });
+    return;
+}
+
 
 module.exports = {
     build_tables: create_tables,
     new_item: insert_item_name,
+
     item_id: get_item_id,
     item_name: get_item_name,
     item_list: get_item_list,
+
     new_stock: insert_incoming_stocks,
     get_all_incoming_stock_on: get_all_incoming_stock_on,
+
     sell_stock: insert_outgoing_stocks,
-    insert_outgoing_stocks: insert_outgoing_stocks
+    get_all_outgoing_stock_on: get_all_outgoing_stock_on,
 };

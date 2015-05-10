@@ -109,7 +109,21 @@ app.get('/api/sell_stock', function (req, res) {
         }
         return;
     });
+});
 
+app.get('/api/get_outgoing_stocks', function (req, res) {
+    console.log("get_outgoing_stocks --> %s", req.query.date);
+    db_logic.get_all_outgoing_stock_on(req.query.date, function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
 });
 
 http.listen(80, function(){

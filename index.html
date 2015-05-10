@@ -55,6 +55,14 @@
                 });
             }
 
+            function list_outgoing_stocks() {
+                var d = new Date();
+                var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+                db_get_outgoing_stocks_ui(date, function (table) {
+                    set_data_section(table);
+                });
+            }
+
             function add_incoming_stock() {
                 db_get_all_items(function (err, obj) {
                     if (err) {
@@ -109,8 +117,8 @@
         <a onclick="list_all_items()" href="javascript:void(0);">Item List</a><br>
         <a onclick="jsfunction('cur_stocks')" href="javascript:void(0);">Current Stocks</a><br>
         <a onclick="list_incoming_stocks()" href="javascript:void(0);">Incoming Stocks</a><br>
-        <a onclick="jsfunction('outgoing_stocks')" href="javascript:void(0);">outgoing_stocks</a><br>
-        <a onclick="jsfunction('opening_stocks')" href="javascript:void(0);">Opening Stocks</a><br>
+        <a onclick="list_outgoing_stocks()" href="javascript:void(0);">outgoing_stocks</a><br>
+        <a onclick="jsfunction('daily_report')" href="javascript:void(0);">Daily Report</a><br>
         <hr />
         <a onclick="add_new_item()" href="javascript:void(0);">Add New Item</a><br>
         <a onclick="add_incoming_stock()" href="javascript:void(0);">Add Incoming Stock</a><br>

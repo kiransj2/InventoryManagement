@@ -130,3 +130,36 @@ function db_sell_stock(obj, callback) {
         callback(false, "Sold " + (obj.quantity / 1000) + "kgs of item '" + name + "' to " + obj.option);
     });
 }
+
+function db_get_outgoing_stocks(date, callback) {
+    ajaxRequest("/api/get_outgoing_stocks?date=" + date, function (error, data) {
+        if (error == true) {
+            callback(false, "Unablet to get outgoing stocks");
+            return;
+        }
+        var obj = JSON.parse(data);
+        callback(false, obj);
+    });
+}
+
+function get_outgoing_stocks_from_json_ui(rows) {
+    var table = "<table class='TColor'><tr><th>Item Name</th><th>Quantity in KG</th><th>Cost Paid</th><th>date</th></tr>";
+    for (var i = 0; i < rows.length; i++) {
+        table += "<tr><td>" + rows[i].name + "</td><td>" + (rows[i].sum / 1000) + "</td><td>";
+        table += rows[i].cost + "</td><td>" + rows[i].dt + "</td></tr>";
+    }
+    table += "</table>";
+    return table;
+}
+
+function db_get_outgoing_stocks_ui(date, callback) {
+    db_get_outgoing_stocks(date, function (error, rows) {
+        var data;
+        if (error) {
+            data = "Error '" + rows + "'";
+        } else {
+            data = get_outgoing_stocks_from_json_ui(rows);
+        }
+        callback(data);
+    });
+}
