@@ -84,19 +84,47 @@ function create_tables(client_callback) {
                 "from total_incoming_stocks_view " +
                 "where item_id NOT in(SELECT item_id from total_outgoing_stocks_view) ";
     
+    var create_transaction_history_view = 
+                 "create view transaction_history as " +
+                 "select name, 'incoming' as type, sum as quantity, cost as price, dt "+
+                 "from incoming_stocks_view " +
+                 "where dt = date('now') " +
+                 "union " +
+                 "select name, 'outgoing' as type, sum as quantity, cost as price, dt " +
+                 "from outgoing_stocks_view " +                 
+                 "order by name ";
+    
     function callback(error_count) {
         if (error_count) {
             console.error("Some table were not created");
             client_callback(error_count);
             return;
         }
-
+        
+        var table = 2;
         db.db_new_table(create_cur_stocks_levels_view, function (err) {
+            table--;
             if (err) {
-                error_count++;
+                err++;
                 console.error("Error creating cur_stocks_levels view");
+                client_callback(err);
+                return;
             }
-            client_callback(error_count);
+            if(!table)
+                client_callback(0);
+            return;
+        });
+
+        db.db_new_table(create_transaction_history_view, function (err) {
+            table--;
+            if (err) {
+                err++;
+                console.error("Error creating cur_stocks_levels view");
+                client_callback(err);
+                return;
+            }
+            if(!table)
+                client_callback(0);
             return;
         });
     }
