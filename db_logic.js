@@ -4,7 +4,7 @@ var util = require("util");
 var moment = require('moment');
 
 var format = util.format;
-var verbose = 1;
+var verbose = 0;
 
 function log(msg) {
     if (verbose) {
@@ -378,6 +378,8 @@ function insert_outgoing_stocks(obj, callback) {
         callback(true, format("date '%s' is not in the correct format", obj.when));
         return;
     }
+    
+    //TODO: Validate the stocks is not greater than Current Available stocks
 
     get_item_id(obj.name, function (err, id) {
         if (err) {
@@ -440,6 +442,27 @@ function get_current_stocks(callback) {
     return;
 }
 
+function get_stocks_of(item_name, callback) {
+    var stmt = format("select * from current_stocks where name = '%s'", item_name);
+    console.log(stmt);
+    
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            var msg = format("Query operation to fetch stocks of '%s' failed due to %s", item_name, err);
+            console.error(msg);
+            callback(true, msg);
+        } else if (rows.length == 0) {
+            var msg = format("Query operation to fetch stocks of '%s' returned nothing.", item_name);
+            console.error(msg);
+            callback(true, msg);            
+        } else {
+            console.log("current_stocks rows.length : %d", rows.length);
+            callback(false, rows);
+        }
+        return;
+    });
+    return;
+}
 
 module.exports = {
     build_tables: create_tables,
@@ -456,4 +479,5 @@ module.exports = {
     get_all_outgoing_stock_on: get_all_outgoing_stock_on,
 
     current_stocks: get_current_stocks,
+    get_stock_of: get_stocks_of
 };

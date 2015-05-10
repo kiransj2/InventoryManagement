@@ -92,7 +92,7 @@
             }
 
             function add_outgoing_stock() {
-                db_get_all_items(function (err, obj) {
+                db_list_current_stocks(function (err, obj) {
                     if (err) {
                         set_data_section("unable to load item list due to error '" + obj + "'");
                         return;
@@ -279,6 +279,19 @@
                     }
                 });
             }
+            function update_quantity(value) {
+                
+                db_get_current_stocks_of(value, function (err, rows) {                    
+                    if (err) {
+                        sweetAlert("", "Unable to get stocks of " + value, "error");
+                        return;
+                    }
+                    //sweetAlert("", "Current Stocks of " + value + " is " + rows[0].cur_stocks);
+                    var obj = document.forms['outgoing_stock']['quantity'];
+                    obj.max = rows[0].cur_stocks/1000;                                      
+                    document.getElementById('stock_level_label').innerHTML = "Available stocks " + (rows[0].cur_stocks/1000) + " Kgs";
+                });
+            }
         </script>
         <div class="input_form">
             <form name='outgoing_stock'
@@ -286,7 +299,8 @@
                   onsubmit='return validate_incoming_stock_data()'>
 
                 <h1> Outgoing Stocks </h1>
-                <select id="itemlist_outgoing" name="itemlist" required></select>
+                <label id="stock_level_label" for="qunatity">  </label>
+                <select id="itemlist_outgoing" name="itemlist" onchange="update_quantity(this.value)" required></select>
                 <input type="number" step="0.001" min="0"
                        max="2500" name='quantity' id='tags'
                        placeholder="quantity in Kgs"
@@ -294,6 +308,7 @@
                 <input type="number" step="1" min="10"
                        max="500000" name='price' id='tags'
                        placeholder="price in Rs"
+                       x-moz-errormessage="This is not a valid e-mail"
                        required />
                 <select name="outgoing_option" required>
                     <option disabled selected> -- select outgoing reason -- </option>

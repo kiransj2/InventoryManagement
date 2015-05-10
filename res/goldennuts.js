@@ -84,9 +84,15 @@ function db_add_stock(name, quantity, price, callback) {
 }
 
 function get_incoming_stocks_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Name</th><th>Quantity in KG</th><th>Cost Paid</th><th>date</th></tr>";
+    var table = "<table class='TColor'><tr><th>Item Name</th><th>Quantity</th><th>Cost Paid</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        table += "<tr><td>" + rows[i].name + "</td><td>" + (rows[i].sum / 1000) + "</td><td>";
+        var weight = 0;
+        if (rows[i].sum < 1000) {
+            weight = "" + rows[i].sum + " gms";
+        } else {
+            weight = "" + (rows[i].sum / 1000) + " kg";
+        }  
+        table += "<tr><td>" + rows[i].name + "</td><td>" + (weight) + "</td><td>";
         table += rows[i].cost + "</td><td>" + rows[i].dt + "</td></tr>";
     }
     table += "</table>";
@@ -143,9 +149,15 @@ function db_get_outgoing_stocks(date, callback) {
 }
 
 function get_outgoing_stocks_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Name</th><th>Quantity in KG</th><th>Cost Paid</th><th>date</th></tr>";
+    var table = "<table class='TColor'><tr><th>Item Name</th><th>Quantity</th><th>Cost Paid</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        table += "<tr><td>" + rows[i].name + "</td><td>" + (rows[i].sum / 1000) + "</td><td>";
+        var weight = 0;
+        if (rows[i].sum < 1000) {
+            weight = "" + rows[i].sum + " gms";
+        } else {
+            weight = "" + rows[i].sum / 1000 + " kgs";
+        }  
+        table += "<tr><td>" + rows[i].name + "</td><td>" + weight + "</td><td>";
         table += rows[i].cost + "</td><td>" + rows[i].dt + "</td></tr>";
     }
     table += "</table>";
@@ -178,13 +190,13 @@ function db_list_current_stocks(callback) {
 }
 
 function get_current_stocks_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Name</th><th>Current Stocks (in KGs)</th></tr>";
+    var table = "<table class='TColor'><tr><th>Item Name</th><th>Current Stocks</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].cur_stocks < 1000) {
             weight = "" + rows[i].cur_stocks + " gms";
         } else {
-            weight = rows[i].cur_stocks / 1000;
+            weight = "" + rows[i].cur_stocks / 1000 + " Kgs";
         }       
         table += "<tr><td>" + rows[i].name + "</td><td>" + (weight) + "</td></tr>";
     }
@@ -202,5 +214,17 @@ function db_list_currents_stocks_ui(callback) {
             data = get_current_stocks_from_json_ui(rows);
         }
         callback(data);
+    });
+}
+
+
+function db_get_current_stocks_of(item_name, callback) {
+    ajaxRequest("/api/get_stock_of?name="+ item_name, function (error, data) {        
+        if (error == true) {
+            callback(true, "Unablet to get current stocks of item " + name);
+            return;
+        }
+        var obj = JSON.parse(data);
+        callback(false, obj);
     });
 }
