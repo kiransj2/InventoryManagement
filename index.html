@@ -60,7 +60,7 @@
 
             function list_incoming_stocks(when) {
                 var t = "<a onclick=\"list_incoming_stocks('today')\" href='javascript:void(0);'> Today's Transactions </a> &nbsp; ";
-                t += "<a onclick=\"list_incoming_stocks('week')\" href='javascript:void(0);'> Last 7 day Transactions  </a> &nbsp; "
+                t += "<a onclick=\"list_incoming_stocks('week')\" href='javascript:void(0);'> Last Weeks Transactions  </a> &nbsp; "
                 t += "<a onclick=\"list_incoming_stocks('month')\" href='javascript:void(0);''> Last Month Transactions </a> &nbsp;"
 
                if (when == null) {
@@ -97,7 +97,7 @@
 
             function list_outgoing_stocks(when) {
                 var t = "<a onclick=\"list_outgoing_stocks('today')\" href='javascript:void(0);'> Today's Transactions </a> &nbsp; ";
-                t += "<a onclick=\"list_outgoing_stocks('week')\" href='javascript:void(0);'> Last 7 day Transactions  </a> &nbsp; "
+                t += "<a onclick=\"list_outgoing_stocks('week')\" href='javascript:void(0);'> Last Week's Transactions  </a> &nbsp; "
                 t += "<a onclick=\"list_outgoing_stocks('month')\" href='javascript:void(0);''> Last Month Transactions </a> &nbsp;"
                 if (when == null) {
                     var d = new Date();
@@ -132,7 +132,7 @@
             }
             
             function list_current_stocks() {
-                db_list_currents_stocks_ui(function (error, table) {
+                db_list_currents_stocks_ui(true, function (error, table) {
                     if (error) {
                         sweetAlert("", table, "error");
                         set_data_section(table);
@@ -192,6 +192,31 @@
                     set_header_section("New Outgoing Stock");
                 });
             }
+
+            function daily_report() {
+                var d = new Date();
+              
+                document.getElementById('data').innerHTML = "";
+                document.getElementById('navigation').remove();
+                document.getElementById('footer').remove();
+                document.getElementById('header').style.height = "20px";
+                document.getElementById('header').style.fontSize = "10px";
+                set_header_section("Daily Report for " + d.toDateString());
+                db_list_currents_stocks_ui(false, function (error, table) {
+                    table = "<label>Closing Stocks (item not shown here are empty)</label>" + table;
+                    set_data_section(document.getElementById('data').innerHTML + "<br/>" + table);
+                });
+                var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+                db_get_outgoing_stocks_ui(date, function (err, table) {
+                    table = "<label> Total Sales Today </label>" + table;
+                    set_data_section(document.getElementById('data').innerHTML + "<br/>" + table);
+                });
+
+                db_get_incoming_stocks_ui(date, function (err, table) {
+                    table = "<label> Total Incoming Stocks </label>" + table;
+                    set_data_section(document.getElementById('data').innerHTML + "<br/>" + table);
+                });
+            }
         </script>
     </head>
 <body>
@@ -205,7 +230,7 @@
         <a onclick="list_current_stocks()" href="javascript:void(0);">Current Stocks</a><br>
         <a onclick="list_incoming_stocks(null)" href="javascript:void(0);">Incoming Stocks</a><br>
         <a onclick="list_outgoing_stocks()" href="javascript:void(0);">outgoing_stocks</a><br>
-        <a onclick="jsfunction('daily_report')" href="javascript:void(0);">Daily Report</a><br>
+        <a onclick="daily_report()" href="javascript:void(0);">Daily Report</a><br>
         <hr />
         <a onclick="add_new_item()" href="javascript:void(0);">Add New Item</a><br>
         <a onclick="add_incoming_stock()" href="javascript:void(0);">Add Incoming Stock</a><br>

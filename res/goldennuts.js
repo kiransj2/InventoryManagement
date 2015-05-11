@@ -128,7 +128,7 @@ function db_get_incoming_stocks_ui(date, callback) {
 function get_incoming_stocks_range_from_json_ui(rows) {
     
     var table = "<table class='TColor'><tr><th>Transaction ID ( total: " + rows.length + " )</th><th>Item Name</th>";
-    table += "<th>IncomingQuantity</th><th>Cost Paid</th><th>date</th><th>Time</th></tr>";
+    table += "<th>Incoming Quantity</th><th>Cost Paid</th><th>date</th><th>Time</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         
         var weight = 0;
@@ -262,34 +262,36 @@ function db_list_current_stocks(callback) {
     });
 }
 
-function get_current_stocks_from_json_ui(rows) {
+function get_current_stocks_from_json_ui(show_zeros, rows) {
     var table = "<table class='TColor'><tr><th>Item Name</th><th>Current Stocks</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        var weight = 0;
-        if (rows[i].cur_stocks < 1000) {
-            weight = "" + rows[i].cur_stocks + " gms";
-        } else {
-            weight = "" + rows[i].cur_stocks / 1000 + " Kgs";
+        if ((rows[i].cur_stocks != 0) || show_zeros) {
+            var weight = 0;
+            if (rows[i].cur_stocks < 1000) {
+                weight = "" + rows[i].cur_stocks + " gms";
+            } else {
+                weight = "" + rows[i].cur_stocks / 1000 + " Kgs";
+            }
+            var td = "<td>";
+            if (rows[i].cur_stocks == 0) {
+                td = "<td bgcolor='#FF0000'>";
+            }
+            
+            table += "<tr>" + td + rows[i].name + "</td>" + td + (weight) + "</td></tr>";
         }
-        var td = "<td>";
-        if (rows[i].cur_stocks == 0) {
-            td = "<td bgcolor='#FF0000'>";
-        } 
-
-        table += "<tr>" + td + rows[i].name + "</td>" + td + (weight) + "</td></tr>";
     }
     table += "</table>";
     return table;
 }
 
 
-function db_list_currents_stocks_ui(callback) {
+function db_list_currents_stocks_ui(show_zeros, callback) {
     db_list_current_stocks(function (error, rows) {
         var data;
         if (error) {
             data = "Error '" + rows + "'";
         } else {            
-            data = get_current_stocks_from_json_ui(rows);
+            data = get_current_stocks_from_json_ui(show_zeros, rows);
         }
         callback(error, data);
     });
