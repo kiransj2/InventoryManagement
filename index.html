@@ -84,7 +84,7 @@
                        default: str = 'unknown'; break;
                    }
                    db_get_incoming_stocks_range(when, function (err, table) {
-                       if (error) {
+                       if (err) {
                            sweetAlert("", table, "error");
                            set_data_section(table);
                            return;
