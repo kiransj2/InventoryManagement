@@ -80,13 +80,30 @@
                 }
             }
 
-            function list_outgoing_stocks() {
-                var d = new Date();
-                var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-                db_get_outgoing_stocks_ui(date, function (table) {
-                    set_data_section(table);
-                    set_header_section("Outgoing Stocks Summary");
-                });
+            function list_outgoing_stocks(when) {
+                var t = "<a onclick=\"list_outgoing_stocks('today')\" href='javascript:void(0);'> Today's Transactions </a> &nbsp; ";
+                t += "<a onclick=\"list_outgoing_stocks('week')\" href='javascript:void(0);'> Last 7 day Transactions  </a> &nbsp; "
+                t += "<a onclick=\"list_outgoing_stocks('month')\" href='javascript:void(0);''> Last Month Transactions </a> &nbsp;"
+                if (when == null) {
+                    var d = new Date();
+                    var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+                    db_get_outgoing_stocks_ui(date, function (table) {
+                        set_data_section(t + "<br/><br/>" + table);
+                        set_header_section("Outgoing Stocks Summary");
+                    });
+                } else {
+                    var str = "";
+                    switch (when) {
+                        case 'today': str = "Today"; break;
+                        case 'week': str = "Last Week"; break;
+                        case 'month': str = "Last Month"; break;
+                        default: str = 'unknown'; break;
+                    }
+                    db_get_outgoing_stocks_range(when, function (err, table) {
+                        set_data_section(t + "<br/><br/>" + table);
+                        set_header_section("Incoming Stocks (" + str + ")");
+                    });
+                }
             }
             
             function list_current_stocks() {

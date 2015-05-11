@@ -210,6 +210,42 @@ function db_get_outgoing_stocks_ui(date, callback) {
 }
 
 
+function get_outgoing_stocks_range_from_json_ui(rows) {
+    var table = "<table class='TColor'><tr><th>Item Name</th><th>Sold Quantity</th><th>Cost Paid</th><th>Date</th><th>Time</th>";
+    table += "<th>Transaction type</th><th>Reason</th></tr>";
+    
+    for (var i = 0; i < rows.length; i++) {
+        var weight = 0;
+        if (rows[i].quantity < 1000) {
+            weight = "" + rows[i].quantity + " gms";
+        } else {
+            weight = "" + rows[i].quantity / 1000 + " kgs";
+        }
+        table += "<tr><td>" + rows[i].name + "</td><td>" + weight + "</td><td>";
+        table += rows[i].price + "</td><td>" + rows[i].dt + "</td><td>" + rows[i].tm;
+        table += "</td><td>" + rows[i].transaction_type + "</td><td>" + rows[i].reason + "</td></tr>";
+    }
+    
+    table += "</table>";
+    return table;
+}
+
+
+function db_get_outgoing_stocks_range(range, callback) {
+    
+    ajaxRequest("/api/get_outgoing_stocks_range?range=" + range, function (error, data) {
+        if (error == true) {
+            callback(false, "Unable to get outgoing stocks for %s days", range);
+            return;
+        }
+        //alert(data);
+        var obj = JSON.parse(data);
+        var d = get_outgoing_stocks_range_from_json_ui(obj);
+        callback(false, d);
+    });
+}
+
+
 
 function db_list_current_stocks(callback) {
     ajaxRequest("/api/get_current_stocks", function (error, data) {

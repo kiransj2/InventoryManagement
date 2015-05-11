@@ -82,6 +82,21 @@ app.get('/api/get_incoming_stocks_range', function (req, res) {
     return;
 });
 
+app.get('/api/get_outgoing_stocks_range', function (req, res) {
+    console.log("get_outgoing_stocks_range --> ", req.query.range);
+    db_logic.get_all_outgoing_stock_range(req.query.range, function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
+});
+
 
 app.get('/api/add_item', function (req, res) {
     db_logic.new_item(req.query.name, function (error, msg) {
