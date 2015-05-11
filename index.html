@@ -47,7 +47,12 @@
             }
 
             function list_all_items() {
-                db_get_items_table_ui(function (table) {
+                db_get_items_table_ui(function (error, table) {
+                    if (error) {
+                        sweetAlert("", table, "error");
+                        set_data_section(table);
+                        return;
+                    }
                     set_data_section(table);
                     set_header_section("All Item");
                 });                
@@ -61,7 +66,12 @@
                if (when == null) {
                     var d = new Date();
                     var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-                    db_get_incoming_stocks_ui(date, function (table) {
+                    db_get_incoming_stocks_ui(date, function (error, table) {
+                        if (error) {
+                            sweetAlert("", table, "error");
+                            set_data_section(table);
+                            return;
+                        }
                         set_data_section(t + "<br/><br/>" + table);
                         set_header_section("Incoming Stocks Today's Summary");
                     });
@@ -73,7 +83,12 @@
                        case 'month': str = "Last Month"; break;
                        default: str = 'unknown'; break;
                    }
-                    db_get_incoming_stocks_range(when, function (err, table) {
+                   db_get_incoming_stocks_range(when, function (err, table) {
+                       if (error) {
+                           sweetAlert("", table, "error");
+                           set_data_section(table);
+                           return;
+                       }
                         set_data_section(t + "<br/><br/>" + table);
                         set_header_section("Incoming Stocks (" + str + ")");
                     });                   
@@ -107,7 +122,12 @@
             }
             
             function list_current_stocks() {
-                db_list_currents_stocks_ui(function (table) {
+                db_list_currents_stocks_ui(function (error, table) {
+                    if (error) {
+                        sweetAlert("", table, "error");
+                        set_data_section(table);
+                        return;
+                    }
                     set_data_section(table);
                     set_header_section("Current Stocks");
                 });

@@ -10,6 +10,9 @@ function ajaxRequest(url, callback) {
         }
         return;
     }
+    xmlhttp.timeout = 2000;
+    xmlhttp.onerror = function () { alert("Server not responding"); }
+    xmlhttp.ontimeout = function() { callback(true, "Server not responding"); }
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
     return;
@@ -42,7 +45,7 @@ function db_add_new_item(name, callback) {
 function db_get_all_items(callback) {
     ajaxRequest("/api/get_item_list", function (error, data) {
         if (error == true) {
-            callback(false, "Unablet to get item list");
+            callback(true, "Unable to get item list");
             return;
         }
         var obj = JSON.parse(data);
@@ -68,7 +71,7 @@ function db_get_items_table_ui(callback) {
         } else {
             data = get_item_table_from_json_ui(rows);
         }
-        callback(data);
+        callback(error, data);
     });
 }
 
@@ -102,7 +105,7 @@ function get_incoming_stocks_from_json_ui(rows) {
 function db_get_incoming_stocks(date, callback) {    
     ajaxRequest("/api/get_incoming_stocks_on?date="+date, function (error, data) {
         if (error == true) {
-            callback(false, "Unable to get incoming stocks");
+            callback(true, "Unable to get incoming stocks");
             return;
         }
         var obj = JSON.parse(data);
@@ -118,7 +121,7 @@ function db_get_incoming_stocks_ui(date, callback) {
         } else {
             data = get_incoming_stocks_from_json_ui(rows);
         }
-        callback(data);
+        callback(error, data);
     });
 }
 
@@ -145,7 +148,7 @@ function db_get_incoming_stocks_range(range, callback) {
     
     ajaxRequest("/api/get_incoming_stocks_range?range=" + range, function (error, data) {
         if (error == true) {
-            callback(false, "Unable to get incoming stocks for 7 days");
+            callback(true, "Unable to get incoming stocks for 7 days");
             return;
         }
         
@@ -173,7 +176,7 @@ function db_sell_stock(obj, callback) {
 function db_get_outgoing_stocks(date, callback) {
     ajaxRequest("/api/get_outgoing_stocks?date=" + date, function (error, data) {
         if (error == true) {
-            callback(false, "Unablet to get outgoing stocks");
+            callback(true, "Unable to get outgoing stocks");
             return;
         }
         var obj = JSON.parse(data);
@@ -205,7 +208,7 @@ function db_get_outgoing_stocks_ui(date, callback) {
         } else {
             data = get_outgoing_stocks_from_json_ui(rows);
         }
-        callback(data);
+        callback(error, data);
     });
 }
 
@@ -250,7 +253,7 @@ function db_get_outgoing_stocks_range(range, callback) {
 function db_list_current_stocks(callback) {
     ajaxRequest("/api/get_current_stocks", function (error, data) {
         if (error == true) {
-            callback(false, "Unablet to get current stocks");
+            callback(true, "Unable to get current stocks");
             return;
         }
         var obj = JSON.parse(data);
@@ -287,7 +290,7 @@ function db_list_currents_stocks_ui(callback) {
         } else {            
             data = get_current_stocks_from_json_ui(rows);
         }
-        callback(data);
+        callback(error, data);
     });
 }
 
@@ -295,7 +298,7 @@ function db_list_currents_stocks_ui(callback) {
 function db_get_current_stocks_of(item_name, callback) {
     ajaxRequest("/api/get_stock_of?name="+ item_name, function (error, data) {        
         if (error == true) {
-            callback(true, "Unablet to get current stocks of item " + name);
+            callback(true, "Unable to get current stocks of item " + name);
             return;
         }
         var obj = JSON.parse(data);
