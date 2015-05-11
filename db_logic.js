@@ -383,10 +383,46 @@ function get_all_incoming_stock_on(when, callback) {
     return;
 }
 
-function get_all_incoming_stock_range(when, callback) {
-    var date = moment().subtract('days', 7);
+function get_all_incoming_stock_summary_range(when, callback) {
+    var date;
+    if (when == 'week')
+        date = moment().subtract(7, 'days');
+    else if (when == 'month')
+        date = moment().subtract(30, 'days');
+    else if (when == 'today')
+        date = moment().subtract(1, 'days');
+    
+    var stmt = format("select * from incoming_stocks_view where dt > '%s'", date.format('YYYY-MM-DD'));
+    log(stmt);
+    
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            console.error("Query operation to fetch incoming_stocks failed %s", err);
+            callback(true, "Query operation to fetch incoming_stocks failed");
+            return;
+        }
+        log(format("rows.length = %d", rows.length));
+        callback(false, rows);
+        return;
+    });
+    return;
+}
 
-    var stmt = format("select * from incoming_stocks where dt > '%s'", date.format('YYYY-MM-DD'));
+function get_all_incoming_stock_range(when, callback) {
+    var date;
+    if (when == 'week')
+        date = moment().subtract(7, 'days');
+    else if(when == 'month')
+        date = moment().subtract(30, 'days');
+    else if(when == 'today')
+        date = moment().subtract(1, 'days');
+
+    var stmt = format("select stocks.transaction_id, stocks.item_id, items.name, stocks.quantity, stocks.price, stocks.dt, stocks.tm " +
+                       "from incoming_stocks as stocks " +
+                       "join items as items " +
+                       "on items.item_id = stocks.item_id " +
+                       "where stocks.dt > date('%s') " +
+                       "order by stocks.transaction_id DESC;" , date.format('YYYY-MM-DD'));
     log(stmt);
     
     db.db_execute_query(stmt, function (err, rows) {
@@ -521,7 +557,8 @@ module.exports = {
 
     new_stock: insert_incoming_stocks,
     get_all_incoming_stock_on: get_all_incoming_stock_on,
-    get_all_incoming_stock_range: get_all_incoming_stock_range,
+    get_all_incoming_stock_range: get_all_incoming_stock_range, 
+    get_all_incoming_stock_summary_range: get_all_incoming_stock_summary_range,
 
     sell_stock: insert_outgoing_stocks,
     get_all_outgoing_stock_on: get_all_outgoing_stock_on,

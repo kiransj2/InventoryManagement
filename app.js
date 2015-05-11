@@ -52,9 +52,9 @@ app.get('/api/get_incoming_stocks_on', function (req, res) {
     return;
 });
 
-app.get('/api/get_incoming_stocks_7days', function (req, res) {
-    console.log("get_incoming_stocks_7days --> ");
-    db_logic.get_all_incoming_stock_range('7days', function (error, json) {
+app.get('/api/get_all_incoming_stock_summary_range', function (req, res) {
+    console.log("get_all_incoming_stock_summary_range --> ", req.query.range);
+    db_logic.get_all_incoming_stock_summary_range(req.query.range, function (error, json) {
         if (error) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end(json);
@@ -66,6 +66,22 @@ app.get('/api/get_incoming_stocks_7days', function (req, res) {
     });
     return;
 });
+
+app.get('/api/get_incoming_stocks_range', function (req, res) {
+    console.log("get_incoming_stocks_range --> ", req.query.range);
+    db_logic.get_all_incoming_stock_range(req.query.range, function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
+});
+
 
 app.get('/api/add_item', function (req, res) {
     db_logic.new_item(req.query.name, function (error, msg) {

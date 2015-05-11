@@ -54,25 +54,29 @@
             }
 
             function list_incoming_stocks(when) {
+                var t = "<a onclick=\"list_incoming_stocks('today')\" href='javascript:void(0);'> Today's Transactions </a> &nbsp; ";
+                t += "<a onclick=\"list_incoming_stocks('week')\" href='javascript:void(0);'> Last 7 day Transactions  </a> &nbsp; "
+                t += "<a onclick=\"list_incoming_stocks('month')\" href='javascript:void(0);''> Last Month Transactions </a> &nbsp;"
+
                if (when == null) {
                     var d = new Date();
                     var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
                     db_get_incoming_stocks_ui(date, function (table) {
-                        var t = "<a href='google.com'> Today's Transactions </a> &nbsp; ";
-                        t += "<a onclick=\"list_incoming_stocks('7days')\" href='javascript:void(0);'> Last 7 days </a> &nbsp; "
-                        t += "<a href='google.com'> Last Month </a> &nbsp;"
                         set_data_section(t + "<br/><br/>" + table);
-                        set_header_section("Incoming Stocks Summary");
+                        set_header_section("Incoming Stocks Today's Summary");
                     });
                } else {
-                   
-                   db_get_incoming_stocks_range('7days', function (err, table) {
-                        var t = "<a href='google.com'> Today's Transactions </a> &nbsp; ";
-                        t += "<a onclick='list_all_items(\'7days\')' href='javascript:void(0);'> Last 7 days </a> &nbsp; "
-                        t += "<a href='google.com'> Last Month </a> &nbsp;"
+                   var str = "";
+                   switch (when) {
+                       case 'today': str = "Today"; break;
+                       case 'week': str = "Last Week"; break;
+                       case 'month': str = "Last Month"; break;
+                       default: str = 'unknown'; break;
+                   }
+                    db_get_incoming_stocks_range(when, function (err, table) {
                         set_data_section(t + "<br/><br/>" + table);
-                        set_header_section("Incoming Stocks Summary");
-                    });
+                        set_header_section("Incoming Stocks (" + str + ")");
+                    });                   
                 }
             }
 
