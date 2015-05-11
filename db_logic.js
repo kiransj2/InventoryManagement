@@ -17,7 +17,7 @@ function create_tables(client_callback) {
                 "item_id integer PRIMARY KEY autoincrement, " +
                 "name varchar(255) NOT NULL," +
                 "dt date NOT NULL default (date('now', 'localtime'))," +
-                "tm time NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
+                "tm time NOT NULL default (time('now', 'localtime'))," +
                 "UNIQUE (name));";
 
     var create_incoming_stock_table = 
@@ -27,7 +27,7 @@ function create_tables(client_callback) {
                 "quantity integer NOT NULL," +
                 "price integer NOT NULL," +
                 "dt date  NOT NULL default (date('now', 'localtime'))," +
-                "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
+                "tm time  NOT NULL default (time('now', 'localtime'))," +
                 "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
 
     var create_incoming_stocks_view = 
@@ -54,7 +54,7 @@ function create_tables(client_callback) {
                 "price INTEGER NOT NULL," +
                 "reason VARCHAR," +
                 "dt date  NOT NULL default (date('now', 'localtime'))," +
-                "tm time  NOT NULL default (time('now', 'localtime', '+270 minutes'))," +
+                "tm time  NOT NULL default (time('now', 'localtime'))," +
                 "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
     
     var create_outgoing_stocks_view = 
@@ -224,7 +224,7 @@ function insert_item_name(name, callback) {
         });
         return;
     } else {
-        var stmt = format("INSERT INTO ITEMS(name,dt) VALUES('%s','%s');", name, db.db_date());
+        var stmt = format("INSERT INTO ITEMS(name,dt,tm) VALUES('%s','%s', '%s');", name, db.db_date(), db.db_time());
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
                 console.error("Insert operation for name '" + name + "' failed due to " + err);
@@ -349,8 +349,8 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
         }
         var stmt;
         var d = (when === null) ? db.db_date() : db.format_user_date(when);
-        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, price, dt) values(%d, %d, %d, '%s');", 
-                       id, quantity, price, d);
+        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, price, dt, tm) values(%d, %d, %d, '%s', '%s');", 
+                       id, quantity, price, d, db.db_time());
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
@@ -473,8 +473,9 @@ function insert_outgoing_stocks(obj, callback) {
         }
         var stmt;
         var d = (obj.when === null) ? db.db_date() : db.format_user_date(obj.when);
-        stmt = format("INSERT INTO outgoing_stocks(transaction_type, item_id, quantity, price, reason, dt)"+
-                      "values('%s', %d, %d, %d, '%s', '%s'); ", obj.option, id, obj.quantity, obj.price, obj.reason, d);
+        stmt = format("INSERT INTO outgoing_stocks(transaction_type, item_id, quantity, price, reason, dt, tm)"+
+                      "values('%s', %d, %d, %d, '%s', '%s', '%s'); ", 
+                      obj.option, id, obj.quantity, obj.price, obj.reason, d, db.db_time());
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {

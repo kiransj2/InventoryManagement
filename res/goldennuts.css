@@ -14,13 +14,15 @@
         float:left;
         padding:10px;
         line-height: 45px;
+        white-space: nowrap;
 }
 #data {
         width:90%;
         left:10%;
         padding:10px;
         height:80%;
-
+        text-align: center;
+        vertical-align: central;
 }
 #footer {
         background-color:black;

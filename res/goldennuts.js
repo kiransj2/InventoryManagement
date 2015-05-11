@@ -214,8 +214,9 @@ function db_get_outgoing_stocks_ui(date, callback) {
 
 
 function get_outgoing_stocks_range_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Name</th><th>Sold Quantity</th><th>Cost Paid</th><th>Date</th><th>Time</th>";
-    table += "<th>Transaction type</th><th>Reason</th></tr>";
+    var table = "<table class='TColor'>"
+    table += "<tr><th>Transaction Id ( total: "+ rows.length +")</th><th>Item Name</th><th>Sold Quantity</th>";
+    table += "<th>Cost Paid</th><th>Date</th><th>Time</th><th>Transaction type</th><th>Reason</th></tr>";
     
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
@@ -224,7 +225,7 @@ function get_outgoing_stocks_range_from_json_ui(rows) {
         } else {
             weight = "" + rows[i].quantity / 1000 + " kgs";
         }
-        table += "<tr><td>" + rows[i].name + "</td><td>" + weight + "</td><td>";
+        table += "<tr><td>" + rows[i].transaction_id + "</td><td>" + rows[i].name + "</td><td>" + weight + "</td><td>";
         table += rows[i].price + "</td><td>" + rows[i].dt + "</td><td>" + rows[i].tm;
         table += "</td><td>" + rows[i].transaction_type + "</td><td>" + rows[i].reason + "</td></tr>";
     }

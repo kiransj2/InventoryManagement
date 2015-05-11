@@ -88,7 +88,7 @@
                            sweetAlert("", table, "error");
                            set_data_section(table);
                            return;
-                       }
+                        }
                         set_data_section(t + "<br/><br/>" + table);
                         set_header_section("Incoming Stocks (" + str + ")");
                     });                   
@@ -102,7 +102,12 @@
                 if (when == null) {
                     var d = new Date();
                     var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-                    db_get_outgoing_stocks_ui(date, function (table) {
+                    db_get_outgoing_stocks_ui(date, function (err, table) {
+                        if (err) {
+                            sweetAlert("", table, "error");
+                            set_data_section(table);
+                            return;
+                        }
                         set_data_section(t + "<br/><br/>" + table);
                         set_header_section("Outgoing Stocks Summary");
                     });
@@ -115,6 +120,11 @@
                         default: str = 'unknown'; break;
                     }
                     db_get_outgoing_stocks_range(when, function (err, table) {
+                        if (err) {
+                            sweetAlert("", table, "error");
+                            set_data_section(table);
+                            return;
+                        }
                         set_data_section(t + "<br/><br/>" + table);
                         set_header_section("Incoming Stocks (" + str + ")");
                     });
@@ -137,6 +147,7 @@
                 db_get_all_items(function (err, obj) {
                     if (err) {
                         set_data_section("unable to load item list due to error '" + obj + "'");
+                        sweetAlert("", "unable to load item list due to error '" + obj + "'", "error");
                         return;
                     }
                     
@@ -160,6 +171,8 @@
                 db_list_current_stocks(function (err, obj) {
                     if (err) {
                         set_data_section("unable to load item list due to error '" + obj + "'");
+                        sweetAlert("", "unable to load item list due to error '" + obj + "'", "error");
+                        return;
                         return;
                     }
                     var x = document.getElementById("itemlist_outgoing");
