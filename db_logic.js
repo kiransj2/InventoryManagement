@@ -32,18 +32,18 @@ function create_tables(client_callback) {
 
     var create_incoming_stocks_view = 
                 "CREATE VIEW incoming_stocks_view AS " +
-                "select stocks.item_id as item_id, name, SUM(quantity) as sum, SUM(price) as cost, stocks.dt as dt " +
-                "from incoming_stocks as stocks " +
-                "JOIN Items as items " +
+                "SELECT stocks.item_id AS item_id, name, SUM(quantity) AS sum, SUM(price) AS cost, stocks.dt AS dt " +
+                "FROM incoming_stocks AS stocks " +
+                "JOIN Items AS items " +
                 "ON stocks.item_id = items.item_id " +
-                "group by name, stocks.item_id, stocks.dt " +
-                "order by dt DESC;";
+                "GROUP BY name, stocks.item_id, stocks.dt " +
+                "ORDER BY dt DESC;";
     
     var create_total_incoming_stocks_view = 
-                "CREATE VIEW total_incoming_stocks_view as " +
-                "select item_id, name, SUM(sum) as quantity, SUM(cost) as price " +
-                "from incoming_stocks_view " +
-                "group by item_id ";
+                "CREATE VIEW total_incoming_stocks_view AS " +
+                "SELECT item_id, name, SUM(sum) AS quantity, SUM(cost) AS price " +
+                "FROM incoming_stocks_view " +
+                "GROUP BY item_id ";
 
     var create_outgoing_stocks_table = 
                 "CREATE TABLE outgoing_stocks(" +
@@ -59,8 +59,8 @@ function create_tables(client_callback) {
     
     var create_outgoing_stocks_view = 
                 "CREATE VIEW outgoing_stocks_view AS " +
-                "select stocks.item_id as item_id, name, SUM(quantity) as sum, SUM(price) as cost, stocks.dt as dt " +
-                "from outgoing_stocks as stocks " +
+                "SELECT stocks.item_id as item_id, name, SUM(quantity) as sum, SUM(price) as cost, stocks.dt as dt " +
+                "FROM outgoing_stocks as stocks " +
                 "JOIN Items as items " +
                 "ON stocks.item_id = items.item_id " +
                 "group by name, stocks.item_id, stocks.dt " +
@@ -68,29 +68,29 @@ function create_tables(client_callback) {
 
     var create_total_outgoing_stock_view = 
                 "CREATE VIEW total_outgoing_stocks_view as " +
-                "select item_id, name, SUM(sum) as quantity, SUM(cost) as price " +
+                "SELECT item_id, name, SUM(sum) as quantity, SUM(cost) as price " +
                 "from outgoing_stocks_view " +
                 "group by item_id";
     
     var create_cur_stocks_levels_view = 
                 "CREATE VIEW current_stocks as " +
-                "select incoming.item_id, incoming.name, " +
+                "SELECT incoming.item_id, incoming.name, " +
                 "SUM(incoming.quantity) - SUM(outgoing.quantity) as cur_stocks " + 
                 "from total_incoming_stocks_view as incoming " +
                 "join total_outgoing_stocks_view as outgoing on incoming.item_id = outgoing.item_id " +
                 "group by incoming.item_id " +
                 "union " +
-                "select item_id, name, quantity " +
+                "SELECT item_id, name, quantity " +
                 "from total_incoming_stocks_view " +
                 "where item_id NOT in(SELECT item_id from total_outgoing_stocks_view) ";
     
     var create_transaction_history_view = 
-                 "create view transaction_history as " +
-                 "select name, 'incoming' as type, sum as quantity, cost as price, dt "+
+                 "CREATE VIEW transaction_history AS " +
+                 "SELECT name, 'incoming' as type, sum as quantity, cost as price, dt "+
                  "from incoming_stocks_view " +
                  "where dt = date('now') " +
                  "union " +
-                 "select name, 'outgoing' as type, sum as quantity, cost as price, dt " +
+                 "SELECT name, 'outgoing' as type, sum as quantity, cost as price, dt " +
                  "from outgoing_stocks_view " +                 
                  "order by name ";
     
@@ -349,7 +349,7 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
         }
         var stmt;
         var d = (when === null) ? db.db_date() : db.format_user_date(when);
-        stmt = format("INSERT INTO incoming_stocks(item_id, quantity, price, dt, tm) values(%d, %d, %d, '%s', '%s');", 
+        stmt = format("INSERT INTO incoming_stocks (item_id, quantity, price, dt, tm) values(%d, %d, %d, '%s', '%s');", 
                        id, quantity, price, d, db.db_time());
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
@@ -367,7 +367,7 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
 
 function get_all_incoming_stock_on(when, callback) {
     var date = moment(when, "YYYY-MM-DD").format("YYYY-MM-DD");
-    var stmt = format("select * from incoming_stocks_view where dt = '%s'", date);
+    var stmt = format("SELECT * from incoming_stocks_view where dt = '%s'", date);
     log(stmt);
 
     db.db_execute_query(stmt, function (err, rows) {
@@ -392,7 +392,7 @@ function get_all_incoming_stock_summary_range(when, callback) {
     else if (when == 'today')
         date = moment().subtract(1, 'days');
     
-    var stmt = format("select * from incoming_stocks_view where dt > '%s'", date.format('YYYY-MM-DD'));
+    var stmt = format("SELECT * from incoming_stocks_view where dt > '%s'", date.format('YYYY-MM-DD'));
     log(stmt);
     
     db.db_execute_query(stmt, function (err, rows) {
@@ -417,7 +417,7 @@ function get_all_incoming_stock_range(when, callback) {
     else if(when == 'today')
         date = moment().subtract(1, 'days');
 
-    var stmt = format("select stocks.transaction_id, stocks.item_id, items.name, stocks.quantity, stocks.price, stocks.dt, stocks.tm " +
+    var stmt = format("SELECT stocks.transaction_id, stocks.item_id, items.name, stocks.quantity, stocks.price, stocks.dt, stocks.tm " +
                        "from incoming_stocks as stocks " +
                        "join items as items " +
                        "on items.item_id = stocks.item_id " +
@@ -473,7 +473,7 @@ function insert_outgoing_stocks(obj, callback) {
         }
         var stmt;
         var d = (obj.when === null) ? db.db_date() : db.format_user_date(obj.when);
-        stmt = format("INSERT INTO outgoing_stocks(transaction_type, item_id, quantity, price, reason, dt, tm)"+
+        stmt = format("INSERT INTO outgoing_stocks (transaction_type, item_id, quantity, price, reason, dt, tm) " +
                       "values('%s', %d, %d, %d, '%s', '%s', '%s'); ", 
                       obj.option, id, obj.quantity, obj.price, obj.reason, d, db.db_time());
         log(stmt);
@@ -493,7 +493,7 @@ function insert_outgoing_stocks(obj, callback) {
 
 function get_all_outgoing_stock_on(when, callback) {
     var date = moment(when, "YYYY-MM-DD").format("YYYY-MM-DD");
-    var stmt = format("select * from outgoing_stocks_view where dt = '%s'", date);
+    var stmt = format("SELECT * FROM outgoing_stocks_view WHERE dt = '%s'", date);
     log(stmt);
     
     db.db_execute_query(stmt, function (err, rows) {
@@ -517,12 +517,12 @@ function get_all_outgoing_stock_range(when, callback) {
     else if (when == 'today')
         date = moment().subtract(1, 'days');
     
-    var stmt = format("select stocks.transaction_id, stocks.transaction_type, items.name, stocks.quantity, stocks.reason, stocks.price, stocks.dt, stocks.tm " +
-                       "from outgoing_stocks as stocks " +
-                       "join items as items " +
-                       "on items.item_id = stocks.item_id " +
-                       "where stocks.dt > date('%s') " +
-                       "order by stocks.transaction_id DESC;" , date.format('YYYY-MM-DD'));
+    var stmt = format("SELECT stocks.transaction_id, stocks.transaction_type, items.name, stocks.quantity, stocks.reason, stocks.price, stocks.dt, stocks.tm " +
+                       "FROM outgoing_stocks AS stocks " +
+                       "JOIN items AS items " +
+                       "ON items.item_id = stocks.item_id " +
+                       "WHERE stocks.dt > date('%s') " +
+                       "ORDER BY stocks.transaction_id DESC;" , date.format('YYYY-MM-DD'));
     log(stmt);
     
     db.db_execute_query(stmt, function (err, rows) {
@@ -539,7 +539,7 @@ function get_all_outgoing_stock_range(when, callback) {
 }
 
 function get_current_stocks(callback) {
-    var stmt = format("select * from current_stocks");
+    var stmt = format("SELECT * FROM current_stocks");
     log(stmt);
     
     db.db_execute_query(stmt, function (err, rows) {
@@ -557,7 +557,7 @@ function get_current_stocks(callback) {
 }
 
 function get_stocks_of(item_name, callback) {
-    var stmt = format("select * from current_stocks where name = '%s'", item_name);
+    var stmt = format("SELECT * FROM current_stocks WHERE name = '%s'", item_name);
     console.log(stmt);
     
     db.db_execute_query(stmt, function (err, rows) {
