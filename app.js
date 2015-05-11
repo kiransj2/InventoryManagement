@@ -37,9 +37,24 @@ app.get('/api/get_item_list', function (req, res) {
     return;
 });
 
-app.get('/api/get_incoming_stocks', function (req, res) {
-    console.log("get_incoming_stocks --> %s", req.query.date);
+app.get('/api/get_incoming_stocks_on', function (req, res) {
+    console.log("get_incoming_stocks_on --> %s", req.query.date);
     db_logic.get_all_incoming_stock_on(req.query.date, function (error, json) {
+        if (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end(json);
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(json));
+        }
+        return;
+    });
+    return;
+});
+
+app.get('/api/get_incoming_stocks_7days', function (req, res) {
+    console.log("get_incoming_stocks_7days --> ");
+    db_logic.get_all_incoming_stock_range('7days', function (error, json) {
         if (error) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end(json);

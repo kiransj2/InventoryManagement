@@ -383,6 +383,25 @@ function get_all_incoming_stock_on(when, callback) {
     return;
 }
 
+function get_all_incoming_stock_range(when, callback) {
+    var date = moment().subtract('days', 7);
+
+    var stmt = format("select * from incoming_stocks where dt > '%s'", date.format('YYYY-MM-DD'));
+    log(stmt);
+    
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            console.error("Query operation to fetch incoming_stocks failed %s", err);
+            callback(true, "Query operation to fetch incoming_stocks failed");
+            return;
+        }
+        log(format("rows.length = %d", rows.length));
+        callback(false, rows);
+        return;
+    });
+    return;
+}
+
 function insert_outgoing_stocks(obj, callback) {
 
     if (typeof obj.quantity !== "number") {
@@ -502,6 +521,7 @@ module.exports = {
 
     new_stock: insert_incoming_stocks,
     get_all_incoming_stock_on: get_all_incoming_stock_on,
+    get_all_incoming_stock_range: get_all_incoming_stock_range,
 
     sell_stock: insert_outgoing_stocks,
     get_all_outgoing_stock_on: get_all_outgoing_stock_on,

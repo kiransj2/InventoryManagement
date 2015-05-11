@@ -13,6 +13,10 @@
             function set_data_section(obj) {
                 document.getElementById('data').innerHTML = obj;
             }
+            function set_header_section(text) {
+                var t = (text == null) ? "The Golden Nuts" : text;
+                document.getElementById('header_').innerHTML = text;                
+            }
         </script>
 
         <!-- My Code -->
@@ -39,20 +43,37 @@
             }
             function add_new_item() {                
                 set_data_section(document.getElementById('new_item').innerHTML);
+                set_header_section("New Item");
             }
 
             function list_all_items() {
                 db_get_items_table_ui(function (table) {
                     set_data_section(table);
+                    set_header_section("All Item");
                 });                
             }
 
-            function list_incoming_stocks() {
-                var d = new Date();
-                var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-                db_get_incoming_stocks_ui(date, function (table) {
-                    set_data_section(table);
-                });
+            function list_incoming_stocks(when) {
+               if (when == null) {
+                    var d = new Date();
+                    var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+                    db_get_incoming_stocks_ui(date, function (table) {
+                        var t = "<a href='google.com'> Today's Transactions </a> &nbsp; ";
+                        t += "<a onclick=\"list_incoming_stocks('7days')\" href='javascript:void(0);'> Last 7 days </a> &nbsp; "
+                        t += "<a href='google.com'> Last Month </a> &nbsp;"
+                        set_data_section(t + "<br/><br/>" + table);
+                        set_header_section("Incoming Stocks Summary");
+                    });
+               } else {
+                   
+                   db_get_incoming_stocks_range('7days', function (err, table) {
+                        var t = "<a href='google.com'> Today's Transactions </a> &nbsp; ";
+                        t += "<a onclick='list_all_items(\'7days\')' href='javascript:void(0);'> Last 7 days </a> &nbsp; "
+                        t += "<a href='google.com'> Last Month </a> &nbsp;"
+                        set_data_section(t + "<br/><br/>" + table);
+                        set_header_section("Incoming Stocks Summary");
+                    });
+                }
             }
 
             function list_outgoing_stocks() {
@@ -60,12 +81,14 @@
                 var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
                 db_get_outgoing_stocks_ui(date, function (table) {
                     set_data_section(table);
+                    set_header_section("Outgoing Stocks Summary");
                 });
             }
             
             function list_current_stocks() {
                 db_list_currents_stocks_ui(function (table) {
                     set_data_section(table);
+                    set_header_section("Current Stocks");
                 });
             }
             
@@ -88,6 +111,7 @@
                     }
                     x.innerHTML = "<option disabled selected> -- choose an item -- </option>" + x.innerHTML;
                     set_data_section(document.getElementById('incoming_stock').innerHTML);
+                    set_header_section("New Incoming Stock");
                 });
             }
 
@@ -111,6 +135,7 @@
                     }
                     x.innerHTML = "<option disabled selected> - choose an item to sell - </option>" + x.innerHTML;
                     set_data_section(document.getElementById('outgoing_stock').innerHTML);
+                    set_header_section("New Outgoing Stock");
                 });
             }
         </script>
@@ -118,13 +143,13 @@
 <body>
 
     <div id="header">
-        <h1>The Golden Nuts</h1>
+        <h1 id="header_">The Golden Nuts</h1>
     </div>
 
     <div id="navigation">
         <a onclick="list_all_items()" href="javascript:void(0);">Item List</a><br>
         <a onclick="list_current_stocks()" href="javascript:void(0);">Current Stocks</a><br>
-        <a onclick="list_incoming_stocks()" href="javascript:void(0);">Incoming Stocks</a><br>
+        <a onclick="list_incoming_stocks(null)" href="javascript:void(0);">Incoming Stocks</a><br>
         <a onclick="list_outgoing_stocks()" href="javascript:void(0);">outgoing_stocks</a><br>
         <a onclick="jsfunction('daily_report')" href="javascript:void(0);">Daily Report</a><br>
         <hr />

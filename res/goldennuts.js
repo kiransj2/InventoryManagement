@@ -100,14 +100,46 @@ function get_incoming_stocks_from_json_ui(rows) {
 }
 
 function db_get_incoming_stocks(date, callback) {    
-    ajaxRequest("/api/get_incoming_stocks?date="+date, function (error, data) {
+    ajaxRequest("/api/get_incoming_stocks_on?date="+date, function (error, data) {
         if (error == true) {
-            callback(false, "Unablet to get incoming stocks");
+            callback(false, "Unable to get incoming stocks");
             return;
         }
         var obj = JSON.parse(data);
         callback(false, obj);
     });
+}
+
+function get_incoming_stocks_range_from_json_ui(rows) {
+
+    var table = "<table class='TColor'><tr><th>Tranaaction ID</th><th>Item Id</th><th>Incoming Quantity</th><th>Cost Paid</th><th>date</th></tr>";
+    for (var i = 0; i < rows.length; i++) {
+        
+        var weight = 0;
+        if (rows[i].quantity < 1000) {
+            weight = "" + rows[i].quantity + " gms";
+        } else {
+            weight = "" + (rows[i].quantity / 1000) + " kg";
+        }
+        table += "<tr><td>" + rows[i].transaction_id + "</td><td>" + rows[i].item_id + "</td><td>" + (weight) + "</td><td>";
+        table += rows[i].price + "</td><td>" + rows[i].dt + "</td></tr>";
+       
+    }
+    table += "</table>";
+    return table;
+}
+
+function db_get_incoming_stocks_range(range, callback) {
+    ajaxRequest("/api/get_incoming_stocks_7days", function (error, data) {
+        if (error == true) {
+            callback(false, "Unable to get incoming stocks for 7 days");
+            return;
+        }
+        
+        var obj = JSON.parse(data);
+        var d = get_incoming_stocks_range_from_json_ui(obj);
+        callback(false, d);
+    });  
 }
 
 function db_get_incoming_stocks_ui(date, callback) {
