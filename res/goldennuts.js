@@ -91,7 +91,12 @@ function db_add_stock(name, quantity, price, callback) {
 }
 
 function get_incoming_stocks_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length+ ")</th><th>Incoming Quantity</th><th>Cost Paid</th><th>date</th></tr>";
+    var total_cost = 0;
+    for (var i = 0; i < rows.length; i++) {
+        total_cost += rows[i].cost;
+    }
+    var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
+    table += "<th>Incoming Quantity</th><th>Cost Paid (total : " + total_cost + ")</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].sum < 1000) {
@@ -131,8 +136,13 @@ function db_get_incoming_stocks_ui(date, callback) {
 
 function get_incoming_stocks_range_from_json_ui(rows) {
     
+    var total_cost = 0;
+    for (var i = 0; i < rows.length; i++) {
+        total_cost += rows[i].price;
+    }
+    
     var table = "<table class='TColor'><tr><th>Transaction ID ( total: " + rows.length + " )</th><th>Item Name</th>";
-    table += "<th>Incoming Quantity</th><th>Cost Paid</th><th>date</th><th>Time</th></tr>";
+    table += "<th>Incoming Quantity</th><th>Cost Paid ( total : " + total_cost + ")</th><th>date</th><th>Time</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         
         var weight = 0;
@@ -189,7 +199,12 @@ function db_get_outgoing_stocks(date, callback) {
 }
 
 function get_outgoing_stocks_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th><th>Sold Quantity</th><th>Cost Paid</th><th>date</th></tr>";
+    var total_cost = 0;
+    for (var i = 0; i < rows.length; i++) {
+        total_cost += rows[i].cost;
+    }
+    var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
+    table += "<th>Sold Quantity</th><th>Cost Paid ( total: " + total_cost + ")</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].sum < 1000) {
@@ -218,9 +233,14 @@ function db_get_outgoing_stocks_ui(date, callback) {
 
 
 function get_outgoing_stocks_range_from_json_ui(rows) {
+    var total_cost = 0;
+    for (var i = 0; i < rows.length; i++) {
+        total_cost += rows[i].price;
+    }
+
     var table = "<table class='TColor'>"
     table += "<tr><th>Transaction Id ( total: "+ rows.length +")</th><th>Item Name</th><th>Sold Quantity</th>";
-    table += "<th>Cost Paid</th><th>Date</th><th>Time</th><th>Transaction type</th><th>Reason</th></tr>";
+    table += "<th>Cost Paid ( total : " + total_cost + ")</th><th>Date</th><th>Time</th><th>Transaction type</th><th>Reason</th></tr>";
     
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
