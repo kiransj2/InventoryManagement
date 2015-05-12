@@ -93,19 +93,20 @@ function db_add_stock(name, quantity, price, callback) {
 function get_incoming_stocks_from_json_ui(rows) {
     var total_cost = 0;
     for (var i = 0; i < rows.length; i++) {
-        total_cost += rows[i].cost;
+        total_cost += rows[i].price;
     }
+    
     var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
     table += "<th>Incoming Quantity</th><th>Cost Paid (total : " + total_cost + ")</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
-        if (rows[i].sum < 1000) {
-            weight = "" + rows[i].sum + " gms";
+        if (rows[i].quantity < 1000) {
+            weight = "" + rows[i].quantity + " gms";
         } else {
-            weight = "" + (rows[i].sum / 1000) + " kg";
+            weight = "" + (rows[i].quantity / 1000) + " kg";
         }  
         table += "<tr><td>" + rows[i].name + "</td><td>" + (weight) + "</td><td>";
-        table += rows[i].cost + "</td><td>" + rows[i].dt + "</td></tr>";
+        table += rows[i].price + "</td><td>" + rows[i].dt + "</td></tr>";
     }
     table += "</table>";
     return table;
@@ -117,6 +118,7 @@ function db_get_incoming_stocks(date, callback) {
             callback(true, "Unable to get incoming stocks");
             return;
         }
+        
         var obj = JSON.parse(data);
         callback(false, obj);
     });
@@ -201,19 +203,19 @@ function db_get_outgoing_stocks(date, callback) {
 function get_outgoing_stocks_from_json_ui(rows) {
     var total_cost = 0;
     for (var i = 0; i < rows.length; i++) {
-        total_cost += rows[i].cost;
+        total_cost += rows[i].price;
     }
     var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
     table += "<th>Sold Quantity</th><th>Cost Paid ( total: " + total_cost + ")</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
-        if (rows[i].sum < 1000) {
-            weight = "" + rows[i].sum + " gms";
+        if (rows[i].quantity < 1000) {
+            weight = "" + rows[i].quantity + " gms";
         } else {
-            weight = "" + rows[i].sum / 1000 + " kgs";
+            weight = "" + rows[i].quantity / 1000 + " kgs";
         }  
         table += "<tr><td>" + rows[i].name + "</td><td>" + weight + "</td><td>";
-        table += rows[i].cost + "</td><td>" + rows[i].dt + "</td></tr>";
+        table += rows[i].price + "</td><td>" + rows[i].dt + "</td></tr>";
     }
     table += "</table>";
     return table;
@@ -233,7 +235,7 @@ function db_get_outgoing_stocks_ui(date, callback) {
 
 
 function get_outgoing_stocks_range_from_json_ui(rows) {
-    var total_cost = 0;
+    var total_cost = 0, total_weight;
     for (var i = 0; i < rows.length; i++) {
         total_cost += rows[i].price;
     }
@@ -266,7 +268,7 @@ function db_get_outgoing_stocks_range(range, callback) {
             callback(false, "Unable to get outgoing stocks for %s days", range);
             return;
         }
-        //alert(data);
+        
         var obj = JSON.parse(data);
         var d = get_outgoing_stocks_range_from_json_ui(obj);
         callback(false, d);
@@ -289,15 +291,15 @@ function db_list_current_stocks(callback) {
 function get_current_stocks_from_json_ui(show_zeros, rows) {
     var table = "<table class='TColor'><tr><th>Item Name</th><th>Current Stocks</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        if ((rows[i].cur_stocks != 0) || show_zeros) {
+        if ((rows[i].quantity != 0) || show_zeros) {
             var weight = 0;
-            if (rows[i].cur_stocks < 1000) {
-                weight = "" + rows[i].cur_stocks + " gms";
+            if (rows[i].quantity < 1000) {
+                weight = "" + rows[i].quantity + " gms";
             } else {
-                weight = "" + rows[i].cur_stocks / 1000 + " Kgs";
+                weight = "" + rows[i].quantity / 1000 + " Kgs";
             }
             var td = "<td>";
-            if (rows[i].cur_stocks == 0) {
+            if (rows[i].quantity == 0) {
                 td = "<td bgcolor='#FF0000'>";
             }
             

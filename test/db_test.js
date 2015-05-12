@@ -161,15 +161,15 @@ function add_new_stock_and_check(name1, name2, name3, name4) {
         console.log("query and check the stocks inserted")
         db_logic.get_all_incoming_stock_on(db.db_date(), function (err, rows) {
             assert(rows.length != 3, format("num of rows %d != 3 (expected)", rows.length));
-            assert(value1 != rows[0].sum, format("1. expected %d != %d", value1, rows[0].sum));
-            assert(value2 != rows[1].sum, format("2. expected %d != %d", value2, rows[1].sum));
-            assert(value3 != rows[2].sum, format("3. expected %d != %d", value3, rows[2].sum));            
+            assert(value1 != rows[0].quantity, format("1. expected %d != %d", value1, rows[0].quantity));
+            assert(value2 != rows[1].quantity, format("2. expected %d != %d", value2, rows[1].quantity));
+            assert(value3 != rows[2].quantity, format("3. expected %d != %d", value3, rows[2].quantity));            
         });
 
         console.log("query and check the stocks on arbitary date")
         db_logic.get_all_incoming_stock_on('2014-1-11', function (err, rows) {
             assert(rows.length != 1, format("num of rows %d != 1 (expected)", rows.length));
-            assert(250 != rows[0].sum, format("expected %d != %d", 250, rows[0].sum));
+            assert(250 != rows[0].quantity, format("expected %d != %d", 250, rows[0].quantity));
         });
 
         add_some_entries_to_db();

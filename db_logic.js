@@ -32,7 +32,7 @@ function create_tables(client_callback) {
 
     var create_incoming_stocks_view = 
                 "CREATE VIEW incoming_stocks_view AS " +
-                "SELECT stocks.item_id AS item_id, name, SUM(quantity) AS sum, SUM(price) AS cost, stocks.dt AS dt " +
+                "SELECT stocks.item_id AS item_id, name, SUM(quantity) AS quantity, SUM(price) AS price, stocks.dt AS dt " +
                 "FROM incoming_stocks AS stocks " +
                 "JOIN Items AS items " +
                 "ON stocks.item_id = items.item_id " +
@@ -41,7 +41,7 @@ function create_tables(client_callback) {
     
     var create_total_incoming_stocks_view = 
                 "CREATE VIEW total_incoming_stocks_view AS " +
-                "SELECT item_id, name, SUM(sum) AS quantity, SUM(cost) AS price " +
+                "SELECT item_id, name, SUM(quantity) AS quantity, SUM(price) AS price " +
                 "FROM incoming_stocks_view " +
                 "GROUP BY item_id ";
 
@@ -59,7 +59,7 @@ function create_tables(client_callback) {
     
     var create_outgoing_stocks_view = 
                 "CREATE VIEW outgoing_stocks_view AS " +
-                "SELECT stocks.item_id as item_id, name, SUM(quantity) as sum, SUM(price) as cost, stocks.dt as dt " +
+                "SELECT stocks.item_id as item_id, name, SUM(quantity) as quantity, SUM(price) as price, stocks.dt as dt " +
                 "FROM outgoing_stocks as stocks " +
                 "JOIN Items as items " +
                 "ON stocks.item_id = items.item_id " +
@@ -68,14 +68,14 @@ function create_tables(client_callback) {
 
     var create_total_outgoing_stock_view = 
                 "CREATE VIEW total_outgoing_stocks_view as " +
-                "SELECT item_id, name, SUM(sum) as quantity, SUM(cost) as price " +
+                "SELECT item_id, name, SUM(quantity) as quantity, SUM(price) as price " +
                 "from outgoing_stocks_view " +
                 "group by item_id";
     
     var create_cur_stocks_levels_view = 
                 "CREATE VIEW current_stocks as " +
                 "SELECT incoming.item_id, incoming.name, " +
-                "SUM(incoming.quantity) - SUM(outgoing.quantity) as cur_stocks " + 
+                "(SUM(incoming.quantity) - SUM(outgoing.quantity)) as quantity " + 
                 "from total_incoming_stocks_view as incoming " +
                 "join total_outgoing_stocks_view as outgoing on incoming.item_id = outgoing.item_id " +
                 "group by incoming.item_id " +
@@ -86,11 +86,11 @@ function create_tables(client_callback) {
     
     var create_transaction_history_view = 
                  "CREATE VIEW transaction_history AS " +
-                 "SELECT name, 'incoming' as type, sum as quantity, cost as price, dt "+
+                 "SELECT name, 'incoming' as type, quantity, price, dt "+
                  "from incoming_stocks_view " +
                  "where dt = date('now') " +
                  "union " +
-                 "SELECT name, 'outgoing' as type, sum as quantity, cost as price, dt " +
+                 "SELECT name, 'outgoing' as type, quantity, price, dt " +
                  "from outgoing_stocks_view " +                 
                  "order by name ";
     
@@ -355,7 +355,7 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
         db.db_execute_query(stmt, function (err, rows) {
             if (err) {
                 var text = "Failed to insert incoming stocks of " + quantity + " gms of item " + name + "failed due to " + err;
-                console.log(text);
+                console.error(text);
                 callback(true, text);
                 return;
             }
@@ -376,6 +376,7 @@ function get_all_incoming_stock_on(when, callback) {
             callback(true, "Query operation to fetch incoming_stocks failed");
             return;
         }
+
         log(format("rows.length = %d", rows.length));
         callback(false, rows);
         return;
