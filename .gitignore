@@ -1,4 +1,5 @@
 *.o
 *.a
 *.db
+*.log
 node_modules

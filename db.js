@@ -113,6 +113,7 @@ module.exports = {
     db_init: db_open,
     db_status: db_status,
     db_set_path: db_set_db_path,
+    db_set_logfile_path: db_set_logfile_path,
     db_exit: db_close,
     db_new_table: db_create_table,
     db_time: date_time,

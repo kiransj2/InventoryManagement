@@ -10,6 +10,9 @@ var hostname = os.hostname();
 var port = 80;
 var server;
 
+db.db_set_path("./db_data/mydb.db");
+db.db_set_logfile_path("./db_data/sql.log");
+
 if(!db.db_init(false)) {
     console.error("unable to open database file");
     process.exit(1);
@@ -208,7 +211,7 @@ app.get('/exit', function (req, res) {
     console.log("closing server on request. Wait for 2.5 seconds to close after shutting down server");
     res.writeHead(200, { 'Content-Type': 'application/text' });
     res.end('done');
-    
+    db.db_exit();
     process.exit(0);
 });
     
