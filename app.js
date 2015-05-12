@@ -7,6 +7,8 @@
     util = require('util');
 
 var hostname = os.hostname();
+var port = 80;
+var server;
 
 if(!db.db_init(false)) {
     console.error("unable to open database file");
@@ -202,6 +204,26 @@ app.get('/api/get_stock_of', function (req, res) {
     return;
 });
 
-http.listen(80, function(){
-    console.log("listening on http://%s:80", hostname);
+app.get('/exit', function (req, res) {
+    console.log("closing server on request. Wait for 2.5 seconds to close after shutting down server");
+    res.writeHead(200, { 'Content-Type': 'application/text' });
+    res.end('done');
+    
+    process.exit(0);
+});
+    
+server = http.listen(port, function(){
+    console.log("listening on http://%s:%d", hostname, port);
+});
+
+process.on('SIGTERM', function () {
+    http.close(function () {
+        process.exit(0);
+    });
+});
+
+process.on('SIGINT', function () {
+    http.close(function () {
+        process.exit(0);
+    });
 });
