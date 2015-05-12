@@ -1,8 +1,8 @@
 ﻿<!DOCTYPE html>
-<html>    
+<html>
     <head>
         <title>The Golden Nuts</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />        
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="/res/goldennuts.css" />
         <script src="/res/goldennuts.js"></script>
 
@@ -15,7 +15,7 @@
             }
             function set_header_section(text) {
                 var t = (text == null) ? "The Golden Nuts" : text;
-                document.getElementById('header_').innerHTML = text;                
+                document.getElementById('header_').innerHTML = text;
             }
         </script>
 
@@ -35,13 +35,13 @@
                 },
                 function (isConfirm) {
                     if (isConfirm) {
-                        callback(true);                        
+                        callback(true);
                     } else {
                         callback(false);
                     }
                 });
             }
-            function add_new_item() {                
+            function add_new_item() {
                 set_data_section(document.getElementById('new_item').innerHTML);
                 set_header_section("New Item");
             }
@@ -55,7 +55,7 @@
                     }
                     set_data_section(table);
                     set_header_section("All Item");
-                });                
+                });
             }
 
             function list_incoming_stocks(when) {
@@ -91,7 +91,7 @@
                         }
                         set_data_section(t + "<br/><br/>" + table);
                         set_header_section("Incoming Stocks (" + str + ")");
-                    });                   
+                    });
                 }
             }
 
@@ -130,7 +130,7 @@
                     });
                 }
             }
-            
+
             function list_current_stocks() {
                 db_list_currents_stocks_ui(true, function (error, table) {
                     if (error) {
@@ -142,7 +142,7 @@
                     set_header_section("Current Stocks");
                 });
             }
-            
+
             function add_incoming_stock() {
                 db_get_all_items(function (err, obj) {
                     if (err) {
@@ -150,11 +150,11 @@
                         sweetAlert("", "unable to load item list due to error '" + obj + "'", "error");
                         return;
                     }
-                    
+
                     var x = document.getElementById("itemlist");
                     // Clear the existings element from the options
                     // and then add the new options values.
-                    x.innerHTML = ""; 
+                    x.innerHTML = "";
                     for (var i = 0; i < obj.length; i++) {
                         var o = document.createElement('option');
                         o.value = obj[i].name;
@@ -180,7 +180,7 @@
                     // and then add the new options values.
                     x.innerHTML = "";
                     for (var i = 0; i < obj.length; i++) {
-                        if (obj[i].cur_stocks) {
+                        if (obj[i].quantity) {
                             var o = document.createElement('option');
                             o.value = obj[i].name;
                             o.text = obj[i].name;
@@ -195,7 +195,7 @@
 
             function daily_report() {
                 var d = new Date();
-              
+
                 document.getElementById('data').innerHTML = "";
                 document.getElementById('navigation').remove();
                 document.getElementById('footer').remove();
@@ -211,7 +211,7 @@
                 setTimeout(function () {
                     var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
                     db_get_outgoing_stocks_ui(date, function (err, table) {
-                        table = "<label> Total Sales Today </label>" + table;
+                        table = "<label> Total Sales </label>" + table;
                         set_data_section(document.getElementById('data').innerHTML + "<br/>" + table);
                     });
 
@@ -225,10 +225,10 @@
             function clearPage() {
                 document.getElementById('navigation').remove();
                 document.getElementById('footer').remove();
-                document.getElementById('header').remove();                
+                document.getElementById('header').remove();
             }
-            
-            function checkUser() {                
+
+            function checkUser() {
                     swal({
                         title: "Enter Password",
                         text: "",
@@ -248,12 +248,12 @@
                         if (inputValue !== "temple") {
                             swal.showInputError("Your password is wrong!");
                         } else {
-                            swal.close();                            
+                            swal.close();
                         }
 
                         return true;
 
-                    });                
+                    });
             }
         </script>
     </head>
@@ -310,20 +310,20 @@
                     if (error === false) {
                         document.getElementById('data').innerHTML = "";
                         sweetAlert("", "Item '" + name + "' added to database", "success");
-                    } else {                        
+                    } else {
                         sweetAlert("oops!", "Item '" + name + "' already exists in database!!", "error");
                     }
                 });
             }
         </script>
         <div class="input_form">
-            <form name='new_item' 
-                  action='javascript:new_item_action()' 
+            <form name='new_item'
+                  action='javascript:new_item_action()'
                   onsubmit='return validate_new_item_form_data()'>
 
                 <h1> Add New Item </h1>
-                <input type="text" name='name' pattern=".{5,}" 
-                       required title="5 letters minimum" id='tags' 
+                <input type="text" name='name' pattern=".{5,}"
+                       required title="5 letters minimum" id='tags'
                        placeholder="Item Name" />
                 <br /><br />
                 <input type="submit" value="Submit" />
@@ -334,11 +334,11 @@
     <!--This part contains the incoming_stocks UI Hidden by default. -->
     <div id="incoming_stock" style="display: none;">
         <script type="text/javascript">
-            function validate_incoming_stock_data() {               
+            function validate_incoming_stock_data() {
                 var item = document.forms['incoming_stock']['itemlist'].value;
                 var quantity = document.forms['incoming_stock']['quantity'].value;
                 var price = document.forms['incoming_stock']['price'].value;
-                return true;                
+                return true;
             }
 
             function incoming_stock_action() {
@@ -350,7 +350,7 @@
                 if (r == false) {
                     return;
                 }
-                
+
                 db_add_stock(name, quantity*1000, price, function (error, msg) {
                     if (error === false) {
                         document.getElementById('data').innerHTML = "";
@@ -424,16 +424,16 @@
                 });
             }
             function update_quantity(value) {
-                
-                db_get_current_stocks_of(value, function (err, rows) {                    
+
+                db_get_current_stocks_of(value, function (err, rows) {
                     if (err) {
                         sweetAlert("", "Unable to get stocks of " + value, "error");
                         return;
                     }
-                    //sweetAlert("", "Current Stocks of " + value + " is " + rows[0].cur_stocks);
+                    //sweetAlert("", "Current Stocks of " + value + " is " + rows[0].quantity);
                     var obj = document.forms['outgoing_stock']['quantity'];
-                    obj.max = rows[0].cur_stocks/1000;                                      
-                    document.getElementById('stock_level_label').innerHTML = "Available stocks " + (rows[0].cur_stocks/1000) + " Kgs";
+                    obj.max = rows[0].quantity/1000;
+                    document.getElementById('stock_level_label').innerHTML = "Available stocks " + (rows[0].quantity/1000) + " Kgs";
                 });
             }
         </script>
