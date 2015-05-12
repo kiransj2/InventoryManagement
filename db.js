@@ -8,9 +8,14 @@ var fs = require("fs"),
 // Global Variables
 var db;
 var repository = "./db/mydb.db";
+var SQL_LOG_FILE = "./db/log.sql"
 
 function db_set_db_path(path) {
     repository = path;
+}
+
+function db_set_logfile_path(path) {
+    SQL_LOG_FILE = path;
 }
 
 // time_now function is used to get the cur_time 
@@ -62,6 +67,9 @@ function db_status() {
 }
 
 function db_execute_query(query, callback) {
+    if (!(query.indexOf('SELECT') == 0)) {
+        fs.appendFileSync(SQL_LOG_FILE, query + "\n");
+    }
     //todo: Log the query being Executed here
     db.all(query, callback);
     return;

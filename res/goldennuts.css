@@ -5,6 +5,8 @@
         padding:5px;
         height:10%;
         line-height: 0px;
+        width:90%;
+        left:10%;
 }
 #navigation {
         line-height:30px;
@@ -14,13 +16,15 @@
         float:left;
         padding:10px;
         line-height: 45px;
+        white-space: nowrap;
 }
 #data {
         width:90%;
         left:10%;
-        padding:10px;
+        padding:5px;
         height:80%;
-
+        text-align: center;
+        vertical-align: central;
 }
 #footer {
         background-color:black;
@@ -31,11 +35,11 @@
 }
 
 .TColor {border-collapse:collapse;margin: 0 auto;width:80%;height:80% }
-.TColor td{padding:7px;border:#4e95f4 1px solid;text-align:center;font-size: 100%}
+.TColor td{padding:3px;border:#4e95f4 1px solid;text-align:center;font-size: 100%}
 .TColor tr{background:#b8d1f3;}
 .TColor tr:nth-child(odd){background:#b8d1f3;}
 .TColor tr:nth-child(even){background: #dae5f4;}
-.TColor th { padding: 5px;border: 1px solid black;border-collapse: collapse}
+.TColor th { padding: 3px;border: 1px solid black;border-collapse: collapse}
 
 .input_form {
     padding: 30px;
@@ -51,6 +55,7 @@
   text-align: center;
   font-size: 25px;
 }
+
 
 .input_form input[type=submit] {
     width: 100%;  
