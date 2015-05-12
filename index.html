@@ -228,7 +228,16 @@
                 document.getElementById('header').remove();
             }
 
+            function show_less_options() {
+                document.getElementById('navigation').innerHTML = document.getElementById('less_link').innerHTML;
+            }
+
+            function show_more_options() {
+                document.getElementById('navigation').innerHTML = document.getElementById('more_link').innerHTML;
+            }
+
             function checkUser() {
+                if (0) {
                     swal({
                         title: "Enter Password",
                         text: "",
@@ -249,11 +258,15 @@
                             swal.showInputError("Your password is wrong!");
                         } else {
                             swal.close();
+                            show_less_options();
                         }
 
                         return true;
 
                     });
+                } else {
+                    show_less_options();
+                }
             }
         </script>
     </head>
@@ -264,6 +277,8 @@
     </div>
 
     <div id="navigation">
+    </div>
+    <div id="less_link" style="display: none">
         <a onclick="list_all_items()" href="javascript:void(0);">Item List</a><br>
         <a onclick="list_current_stocks()" href="javascript:void(0);">Current Stocks</a><br>
         <a onclick="list_incoming_stocks(null)" href="javascript:void(0);">Incoming Stocks</a><br>
@@ -274,7 +289,15 @@
         <a onclick="add_incoming_stock()" href="javascript:void(0);">Add Incoming Stock</a><br>
         <a onclick="add_outgoing_stock()" href="javascript:void(0);">Add outgoing item</a><br>
         <hr />
+        <a onclick="show_more_options()" href="javascript:void(0);">Show more options</a><br>
         <a onclick="shutdown_server()" href="javascript:void(0);">Close Server</a><br>
+        <hr />
+    </div>
+
+    <div id="more_link" style="display: none;">
+        <a onclick="jsfunction()" href="javascript:void(0);">Cost Analysis</a><br>
+        <a onclick="jsfunction()" href="javascript:void(0);">Stock Analysis</a><br>
+        <a onclick="show_less_options()" href="javascript:void(0);">Show less options</a><br>
         <hr />
     </div>
 
@@ -283,8 +306,9 @@
     </div>
 
     <div id="footer">
-        <p> </p>
     </div>
+
+    
 
     <!--This part contains the new item UI Hidden by default. -->
     <div id="new_item" style="display: none;">
