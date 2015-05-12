@@ -1,6 +1,7 @@
 function ajaxRequest(url, callback) {
+    var is_firefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     var xmlhttp = new XMLHttpRequest();
-    
+    //var xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             callback(false, xmlhttp.responseText);
@@ -10,9 +11,12 @@ function ajaxRequest(url, callback) {
         }
         return;
     }
-    xmlhttp.timeout = 2000;
-    xmlhttp.onerror = function () { alert("Server not responding"); }
-    xmlhttp.ontimeout = function() { callback(true, "Server not responding"); }
+    if (is_firefox) {
+        xmlhttp.timeout = 2000;
+        xmlhttp.ontimeout = function () {
+            callback(true, "Server not responding");
+        }
+    }
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
     return;
