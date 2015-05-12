@@ -3,6 +3,7 @@
     <head>
         <title>The Golden Nuts</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="refresh" content="600"/>
         <link rel="stylesheet" href="/res/goldennuts.css" />
         <script src="/res/goldennuts.js"></script>
 
@@ -227,33 +228,33 @@
                 document.getElementById('footer').remove();
                 document.getElementById('header').remove();                
             }
+            
+            function checkUser() {                
+                    swal({
+                        title: "Enter Password",
+                        text: "",
+                        type: "input",
+                        inputType: "password",
+                        showCancelButton: true,
+                        closeOnConfirm: false,
+                        animation: "slide-from-top",
+                        inputPlaceholder: "Write something"
+                    },
+                    function (inputValue) {
+                        if (inputValue === false) {
+                            clearPage();
+                            return false;
+                        }
 
-            function checkUser() {
-                swal({
-                    title: "An input!",
-                    text: "Write something interesting:",
-                    type: "input",
-                    inputType: "password",
-                    showCancelButton: true,
-                    closeOnConfirm: false,
-                    animation: "slide-from-top",
-                    inputPlaceholder: "Write something"
-                },
-                function (inputValue) {
-                    if (inputValue === false) {
-                        clearPage();
-                        return false;
-                    }                    
-                    
-                    if (inputValue !== "temple") {
-                        swal.showInputError("Your password is wrong!");                                                
-                    } else {
-                        swal.close();
-                    }
-                    
-                    return true;
-                    
-                });
+                        if (inputValue !== "temple") {
+                            swal.showInputError("Your password is wrong!");
+                        } else {
+                            swal.close();                            
+                        }
+
+                        return true;
+
+                    });                
             }
         </script>
     </head>
@@ -283,7 +284,7 @@
     </div>
 
     <div id="footer">
-        <p> This part will have footer </p>
+        <p> </p>
     </div>
 
     <!--This part contains the new item UI Hidden by default. -->
