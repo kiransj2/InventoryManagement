@@ -221,9 +221,43 @@
                     });
                 }, 100);
             }
+
+            function clearPage() {
+                document.getElementById('navigation').remove();
+                document.getElementById('footer').remove();
+                document.getElementById('header').remove();                
+            }
+
+            function checkUser() {
+                swal({
+                    title: "An input!",
+                    text: "Write something interesting:",
+                    type: "input",
+                    inputType: "password",
+                    showCancelButton: true,
+                    closeOnConfirm: false,
+                    animation: "slide-from-top",
+                    inputPlaceholder: "Write something"
+                },
+                function (inputValue) {
+                    if (inputValue === false) {
+                        clearPage();
+                        return false;
+                    }                    
+                    
+                    if (inputValue !== "temple") {
+                        swal.showInputError("Your password is wrong!");                                                
+                    } else {
+                        swal.close();
+                    }
+                    
+                    return true;
+                    
+                });
+            }
         </script>
     </head>
-<body>
+<body onload="checkUser()">
 
     <div id="header">
         <h1 id="header_">The Golden Nuts</h1>
