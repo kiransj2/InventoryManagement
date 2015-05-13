@@ -21,26 +21,7 @@
 
         <!-- My Code -->
         <script type="text/javascript">
-            function confirm_action(text, callback) {
-                swal({
-                    title: "Are you sure?",
-                    text: text,
-                    type: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Yes, Do it.",
-                    cancelButtonText: "No, Stop!",
-                    closeOnConfirm: true,
-                    closeOnCancel: true
-                },
-                function (isConfirm) {
-                    if (isConfirm) {
-                        callback(true);
-                    } else {
-                        callback(false);
-                    }
-                });
-            }
+
             function add_new_item() {
                 set_data_section(document.getElementById('new_item').innerHTML);
                 set_header_section("New Item");
