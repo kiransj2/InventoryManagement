@@ -254,9 +254,23 @@
 
                     });
             }
+
+            function Addrow() {                
+                var table = document.getElementById("incoming_table");
+                var row = table.insertRow(table.rows.length);
+                row.innerHTML = "<td/><td><input name='quantity' type='number' /></td><td><input name='price' type='number'/></td>";
+            }
+
+            function submit_table() {
+                var table = document.getElementById("incoming_table");
+                for (var i = 1; i < table.rows.length; i++) {                   
+                    var rowDisAmt = JSON.stringify(table.rows[i].cells[0].childNodes[1].value);
+                    alert(rowDisAmt);
+                }
+            }
         </script>
     </head>
-<body onload="checkUser()">
+<body onload="checkUser1()">
 
     <div id="header">
         <h1 id="header_">The Golden Nuts</h1>
@@ -277,8 +291,31 @@
         <hr />
     </div>
 
-    <div id="data">
-
+    <div id="data">       
+        <table class='TColor' id="incoming_table">
+            <tr>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Price Paid</th>
+            </tr>
+            <tr>
+                <td>
+                    <select>
+                        <option value="time1">Time1</option>
+                        <option>Time2</option>
+                        <option>Time3</option>
+                    </select>
+                </td>
+                <td contenteditable>
+                    <input name="quantity" type="number" />
+                </td>
+                <td contenteditable>
+                    <input name="price" type="number" />
+                </td>            
+            </tr>
+        </table>
+        <input type="button" value="AddRow" onclick="Addrow()"/>
+        <input type="button" value="Submit" onclick="submit_table()" />
     </div>
 
     <div id="footer">
