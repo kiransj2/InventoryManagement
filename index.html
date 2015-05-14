@@ -257,14 +257,14 @@
 
             function Addrow() {                
                 var table = document.getElementById("incoming_table");
-                var row = table.insertRow(table.rows.length);
-                row.innerHTML = "<td/><td><input name='quantity' type='number' /></td><td><input name='price' type='number'/></td>";
+                var row = table.insertRow(table.rows.length);                
+                row.innerHTML = table.rows[1].innerHTML;
             }
 
             function submit_table() {
                 var table = document.getElementById("incoming_table");
                 for (var i = 1; i < table.rows.length; i++) {                   
-                    var rowDisAmt = JSON.stringify(table.rows[i].cells[0].childNodes[1].value);
+                    var rowDisAmt = JSON.stringify(table.rows[i].cells[1].childNodes[1].value);
                     alert(rowDisAmt);
                 }
             }
@@ -291,31 +291,34 @@
         <hr />
     </div>
 
-    <div id="data">       
-        <table class='TColor' id="incoming_table">
-            <tr>
-                <th>Item Name</th>
-                <th>Quantity</th>
-                <th>Price Paid</th>
-            </tr>
-            <tr>
-                <td>
-                    <select>
-                        <option value="time1">Time1</option>
-                        <option>Time2</option>
-                        <option>Time3</option>
-                    </select>
-                </td>
-                <td contenteditable>
-                    <input name="quantity" type="number" />
-                </td>
-                <td contenteditable>
-                    <input name="price" type="number" />
-                </td>            
-            </tr>
-        </table>
-        <input type="button" value="AddRow" onclick="Addrow()"/>
-        <input type="button" value="Submit" onclick="submit_table()" />
+    <div id="data">    
+        <form>
+            <table class='TColor' id="incoming_table">
+                <tr>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Price Paid</th>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            <option value="time1" required>Amar</option>
+                            <option>Omar</option>
+                            <option>Tmar</option>
+                        </select>
+                    </td>
+                    <td contenteditable>
+                        <input name="quantity" type="number" required />
+                    </td>
+                    <td contenteditable>
+                        <input name="price" type="number" required />
+                    </td>
+                </tr>
+            </table>
+            <input type="button" value="AddRow" onclick="Addrow()" />
+            <input type="button" value="CheckTable" onclick="submit_table()" />
+            <input type="submit" value="Submit" tabindex="4" />
+        </form>   
     </div>
 
     <div id="footer">
