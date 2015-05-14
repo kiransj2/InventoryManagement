@@ -35,7 +35,7 @@
 }
 
 .TColor {border-collapse:collapse;margin: 0 auto;width:80%;height:80% }
-.TColor td{padding:3px;border:#4e95f4 1px solid;text-align:center;font-size: 100%}
+.TColor td{padding:3px;border:#4e95f4 1px solid;text-align:left;font-size: 100%}
 .TColor tr{background:#b8d1f3;}
 .TColor tr:nth-child(odd){background:#b8d1f3;}
 .TColor tr:nth-child(even){background: #dae5f4;}
