@@ -126,8 +126,8 @@ function get_incoming_stocks_from_json_ui(rows) {
         total_stocks += rows[i].quantity;
     }
     total_stocks = total_stocks / 1000;
-    var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
-    table += "<th>Incoming Quantity (" + total_stocks + " Kg)</th><th>Cost Paid (total : " + total_cost + ")</th><th>date</th></tr>";
+    var table = "<table class='TColor'><tr><th>Name (total: " + rows.length + ")</th>";
+    table += "<th>Quantity (" + total_stocks + " Kg)</th><th>Paid (Rs " + total_cost + ")</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].quantity < 1000) {
@@ -173,8 +173,8 @@ function get_incoming_stocks_range_from_json_ui(rows) {
         total_stocks += rows[i].quantity;
     }
     total_stocks = total_stocks / 1000;
-    var table = "<table class='TColor'><tr><th>Transaction ID ( total: " + rows.length + " )</th><th>Item Name</th>";
-    table += "<th>Incoming Quantity ( " + total_stocks + " Kg )</th><th>Cost Paid ( total : " + total_cost + ")</th><th>date</th><th>Time</th></tr>";
+    var table = "<table class='TColor'><tr><th>Order ID ( total: " + rows.length + " )</th><th>Name</th>";
+    table += "<th>Quantity ( " + total_stocks + " Kg )</th><th>Paid (Rs " + total_cost + ")</th><th>date</th><th>Time</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         
         var weight = 0;
@@ -238,7 +238,7 @@ function get_outgoing_stocks_from_json_ui(rows) {
     }
     total_quantity = total_quantity/1000;
     var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
-    table += "<th>Sold Quantity (" + total_quantity + " Kg)</th><th>Cost Paid ( total: " + total_cost + ")</th><th>date</th></tr>";
+    table += "<th>Quantity (" + total_quantity + " Kg)</th><th>Paid (Rs " + total_cost + ")</th><th>date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].quantity < 1000) {
@@ -275,8 +275,8 @@ function get_outgoing_stocks_range_from_json_ui(rows) {
     total_stocks = total_stocks / 1000;
 
     var table = "<table class='TColor'>"
-    table += "<tr><th> Id(total:"+ rows.length +")</th><th>Item Name</th><th>Sold Quantity(" + total_stocks + " Kg)</th>";
-    table += "<th>Cost Paid(total:" + total_cost +")</th><th>Date</th><th>Time</th><th>Transaction type</th><th>Reason</th></tr>";
+    table += "<tr><th> Order Id (total:"+ rows.length +")</th><th>Name</th><th>Quantity (" + total_stocks + " Kg)</th>";
+    table += "<th>Paid (Rs " + total_cost +")</th><th>Date</th><th>Time</th><th>Order type</th><th>Reason</th></tr>";
     
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
