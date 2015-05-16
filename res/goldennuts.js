@@ -127,7 +127,7 @@ function get_incoming_stocks_from_json_ui(rows) {
     }
     total_stocks = total_stocks / 1000;
     var table = "<table class='TColor'><tr><th>Name (total: " + rows.length + ")</th>";
-    table += "<th>Quantity (" + total_stocks + " Kg)</th><th>Paid (Rs " + total_cost + ")</th><th>date</th></tr>";
+    table += "<th>Quantity (" + total_stocks + " Kg)</th><th>Paid (Rs " + total_cost + ")</th><th>Date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].quantity < 1000) {
@@ -174,7 +174,7 @@ function get_incoming_stocks_range_from_json_ui(rows) {
     }
     total_stocks = total_stocks / 1000;
     var table = "<table class='TColor'><tr><th>Order ID ( total: " + rows.length + " )</th><th>Name</th>";
-    table += "<th>Quantity ( " + total_stocks + " Kg )</th><th>Paid (Rs " + total_cost + ")</th><th>date</th><th>Time</th></tr>";
+    table += "<th>Quantity ( " + total_stocks + " Kg )</th><th>Paid (Rs " + total_cost + ")</th><th>Date</th><th>Time</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         
         var weight = 0;
@@ -238,7 +238,7 @@ function get_outgoing_stocks_from_json_ui(rows) {
     }
     total_quantity = total_quantity/1000;
     var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
-    table += "<th>Quantity (" + total_quantity + " Kg)</th><th>Paid (Rs " + total_cost + ")</th><th>date</th></tr>";
+    table += "<th>Quantity (" + total_quantity + " Kg)</th><th>Paid (Rs " + total_cost + ")</th><th>Date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].quantity < 1000) {
@@ -333,7 +333,7 @@ function get_current_stocks_from_json_ui(show_zeros, rows) {
     total_stocks = total_stocks / 1000;
     var table = "<table class='TColor'><tr>";
     table += "<th>Items (total:" + (rows.length - total_zero) + ", zero:"+ total_zero +")</th>";
-    table += "<th> CurrentStocks (" + total_stocks + " Kg) </th></tr> ";
+    table += "<th> Current Stocks (" + total_stocks + " Kg) </th></tr> ";
     for (var i = 0; i < rows.length; i++) {
         if ((rows[i].quantity != 0) || show_zeros) {
             var weight = 0;
