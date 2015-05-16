@@ -353,3 +353,32 @@ function shutdown_server() {
         document.getElementById('header').remove();
     });
 }
+
+function get_options_with_item_list(stocks, select_id, callback) {
+    
+    function handle_data(error, rows) {
+        var data;
+        if (!error) {        
+            var x = document.getElementById(select_id);
+            // Clear the existings element from the options
+            // and then add the new options values.
+            x.innerHTML = "";
+            for (var i = 0; i < rows.length; i++) {
+                if (!stocks || (rows[i].quantity != 0)) {
+                    var o = document.createElement('option');
+                    o.value = rows[i].name;
+                    o.text = rows[i].name;
+                    x.options.add(o);
+                }
+            }
+            x.innerHTML = "<option disabled selected> -- choose an item -- </option>" + x.innerHTML;
+            //set_data_section(document.getElementById('incoming_stock').innerHTML);        
+        }
+        callback(error);
+    }
+    
+    if (stocks)
+        db_list_current_stocks(handle_data);
+    else
+        db_get_all_items(handle_data);
+}

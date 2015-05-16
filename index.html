@@ -132,7 +132,7 @@
                         return;
                     }
 
-                    var x = document.getElementById("itemlist");
+                    /*var x = document.getElementById("incoming_item_options");
                     // Clear the existings element from the options
                     // and then add the new options values.
                     x.innerHTML = "";
@@ -142,7 +142,8 @@
                         o.text = obj[i].name;
                         x.options.add(o);
                     }
-                    x.innerHTML = "<option disabled selected> -- choose an item -- </option>" + x.innerHTML;
+                    x.innerHTML = "<option disabled selected> -- choose an item -- </option>" + x.innerHTML;*/
+                    get_options_with_item_list(false, "incoming_item_options");
                     set_data_section(document.getElementById('incoming_stock').innerHTML);
                     set_header_section("New Incoming Stock");
                 });
@@ -156,19 +157,8 @@
                         return;
                         return;
                     }
-                    var x = document.getElementById("itemlist_outgoing");
-                    // Clear the existings element from the options
-                    // and then add the new options values.
-                    x.innerHTML = "";
-                    for (var i = 0; i < obj.length; i++) {
-                        if (obj[i].quantity) {
-                            var o = document.createElement('option');
-                            o.value = obj[i].name;
-                            o.text = obj[i].name;
-                            x.options.add(o);
-                        }
-                    }
-                    x.innerHTML = "<option disabled selected> - choose an item to sell - </option>" + x.innerHTML;
+
+                    get_options_with_item_list(true /*Get STocks*/, "itemlist_outgoing");
                     set_data_section(document.getElementById('outgoing_stock').innerHTML);
                     set_header_section("New Outgoing Stock");
                 });
@@ -254,20 +244,6 @@
 
                     });
             }
-
-            function Addrow() {                
-                var table = document.getElementById("incoming_table");
-                var row = table.insertRow(table.rows.length);                
-                row.innerHTML = table.rows[1].innerHTML;
-            }
-
-            function submit_table() {
-                var table = document.getElementById("incoming_table");
-                for (var i = 1; i < table.rows.length; i++) {                   
-                    var rowDisAmt = JSON.stringify(table.rows[i].cells[1].childNodes[1].value);
-                    alert(rowDisAmt);
-                }
-            }
         </script>
     </head>
 <body onload="checkUser1()">
@@ -280,45 +256,18 @@
         <a onclick="list_all_items()" href="javascript:void(0);">Item List</a><br>
         <a onclick="list_current_stocks()" href="javascript:void(0);">Current Stocks</a><br>
         <a onclick="list_incoming_stocks(null)" href="javascript:void(0);">Incoming Stocks</a><br>
-        <a onclick="list_outgoing_stocks()" href="javascript:void(0);">outgoing_stocks</a><br>
+        <a onclick="list_outgoing_stocks()" href="javascript:void(0);">Outgoing Stocks</a><br>
         <a onclick="daily_report()" href="javascript:void(0);">Daily Report</a><br>
         <hr />
-        <a onclick="add_new_item()" href="javascript:void(0);">Add New Item</a><br>
-        <a onclick="add_incoming_stock()" href="javascript:void(0);">Add Incoming Stock</a><br>
-        <a onclick="add_outgoing_stock()" href="javascript:void(0);">Add outgoing item</a><br>
+        <a onclick="add_new_item()" href="javascript:void(0);">New Item</a><br>
+        <a onclick="add_incoming_stock()" href="javascript:void(0);">Add Stock</a><br>
+        <a onclick="add_outgoing_stock()" href="javascript:void(0);">Sell Stock</a><br>
         <hr />
         <a onclick="shutdown_server()" href="javascript:void(0);">Close Server</a><br>
         <hr />
     </div>
 
-    <div id="data">    
-        <form>
-            <table class='TColor' id="incoming_table">
-                <tr>
-                    <th>Item Name</th>
-                    <th>Quantity</th>
-                    <th>Price Paid</th>
-                </tr>
-                <tr>
-                    <td>
-                        <select>
-                            <option value="time1" required>Amar</option>
-                            <option>Omar</option>
-                            <option>Tmar</option>
-                        </select>
-                    </td>
-                    <td contenteditable>
-                        <input name="quantity" type="number" required />
-                    </td>
-                    <td contenteditable>
-                        <input name="price" type="number" required />
-                    </td>
-                </tr>
-            </table>
-            <input type="button" value="AddRow" onclick="Addrow()" />
-            <input type="button" value="CheckTable" onclick="submit_table()" />
-            <input type="submit" value="Submit" tabindex="4" />
-        </form>   
+    <div id="data">      
     </div>
 
     <div id="footer">
@@ -377,7 +326,7 @@
     </div>
 
     <!--This part contains the incoming_stocks UI Hidden by default. -->
-    <div id="incoming_stock" style="display: none;">
+    <div id="incoming_stock_tmp" style="display: none;">
         <script type="text/javascript">
             function validate_incoming_stock_data() {
                 var item = document.forms['incoming_stock']['itemlist'].value;
@@ -417,7 +366,7 @@
                   onsubmit='return validate_incoming_stock_data()'>
 
                 <h1> Incoming Stocks </h1>
-                <select id="itemlist" name="itemlist" 
+                <select id="itemlist" name="incoming_item"
                         tabindex="1"
                         required />                
 
@@ -435,6 +384,71 @@
 
                 <br /><br />
                 <input type="submit" value="Submit" tabindex="4"/>
+            </form>
+        </div>
+    </div>
+
+    <!--This part contains the incoming_stocks UI Hidden by default. -->
+    <div id="incoming_stock" style="display: none;">
+        <script type="text/javascript">
+            function AddItem() {                
+                var table = document.getElementById("incoming_table");
+                var row = table.insertRow(table.rows.length);
+                row.innerHTML = table.rows[1].innerHTML;
+            }
+
+            function DeleteLastItem() {
+                var table = document.getElementById("incoming_table");
+                if (table.rows.length > 2) {
+                    table.deleteRow(table.rows.length - 1);
+                }
+            }
+
+            function incoming_stock_list_action() {
+                var obj = {};
+                var table = document.getElementById("incoming_table");
+
+                obj.size = table.rows.length - 2;
+                obj.item = [];
+                for (var i = 1; i < table.rows.length; i++) {
+                    var item = {};
+                    item.name = table.rows[i].cells[0].childNodes[1].value;
+                    item.quantity = table.rows[i].cells[1].childNodes[1].value;
+                    item.price = table.rows[i].cells[2].childNodes[1].value;                 
+                    obj.item.push(item);                    
+                }
+                sweetAlert("", JSON.stringify(obj));
+            }
+        </script>
+        <div class="input_table_form">
+            <form name='incoming_stock'
+                  action='javascript:incoming_stock_list_action()'
+                  onsubmit='return validate_incoming_stock_list()'>
+                <table class='TColor' id="incoming_table">
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                        <th>Price Paid</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="incoming_item_options" required></select>
+                        </td>
+                        <td>
+                            <input name="quantity" placeholder="quantity in Kgs"
+                                   type="number" step="0.001" max="2500" min=".001"
+                                   required />
+                        </td>
+                        <td>
+                            <input name="price" placeholder="price in Rs"
+                                   type="number" step="1" max="250000" min="1"
+                                   required />
+                        </td>
+                    </tr>
+                </table> <br />
+                <input type="button" value="Add Item" onclick="AddItem()" />
+                <input type="button" value="Delete Last Item" onclick="DeleteLastItem()" />                
+                <input type="submit" value="Submit" />
             </form>
         </div>
     </div>
