@@ -17,6 +17,23 @@
                 var t = (text == null) ? "The Golden Nuts" : text;
                 document.getElementById('header_').innerHTML = text;
             }
+            function confirmAction(header, msg, callback) {
+                swal({
+                    title: header,
+                    text: msg,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    cancelButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes",
+                    cancelButtonText: "No",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                },
+                function (isConfirm) {
+                    callback(isConfirm);
+                });
+            }
         </script>
 
         <!-- My Code -->
@@ -132,17 +149,6 @@
                         return;
                     }
 
-                    /*var x = document.getElementById("incoming_item_options");
-                    // Clear the existings element from the options
-                    // and then add the new options values.
-                    x.innerHTML = "";
-                    for (var i = 0; i < obj.length; i++) {
-                        var o = document.createElement('option');
-                        o.value = obj[i].name;
-                        o.text = obj[i].name;
-                        x.options.add(o);
-                    }
-                    x.innerHTML = "<option disabled selected> -- choose an item -- </option>" + x.innerHTML;*/
                     get_options_with_item_list(false, "incoming_item_options");
                     set_data_section(document.getElementById('incoming_stock').innerHTML);
                     set_header_section("New Incoming Stock");
@@ -191,24 +197,6 @@
                         set_data_section(document.getElementById('data').innerHTML + "<br/>" + table);
                     });
                 }, 100);
-            }
-
-            function confirmAction(header, msg, callback) {
-                swal({
-                    title: header,
-                    text: msg,
-                    type: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#DD6B55",
-                    cancelButtonColor: "#DD6B55",
-                    confirmButtonText: "Yes",
-                    cancelButtonText: "No",
-                    closeOnConfirm: false,
-                    closeOnCancel: false
-                },
-                function (isConfirm) {                    
-                    callback(isConfirm);
-                });
             }
 
             function clearPage() {
@@ -406,6 +394,7 @@
 
             function incoming_stock_list_action() {
                 var obj = {};
+                var total_quantity = 0, total_cost = 0, total_items = 0;
                 var table = document.getElementById("incoming_table");
 
                 obj.size = table.rows.length - 2;
@@ -413,11 +402,33 @@
                 for (var i = 1; i < table.rows.length; i++) {
                     var item = {};
                     item.name = table.rows[i].cells[0].childNodes[1].value;
-                    item.quantity = table.rows[i].cells[1].childNodes[1].value;
-                    item.price = table.rows[i].cells[2].childNodes[1].value;                 
-                    obj.item.push(item);                    
-                }
-                sweetAlert("", JSON.stringify(obj));
+                    item.quantity = parseFloat(table.rows[i].cells[1].childNodes[1].value);
+                    item.price = parseInt(table.rows[i].cells[2].childNodes[1].value);
+                    obj.item.push(item);
+                    total_quantity += item.quantity;
+                    total_cost += item.price;
+                    total_items++;
+                }           
+                confirmAction(
+                    "Total " + total_quantity + " KG, " + total_cost + " Rs",
+                    "Summary for " + total_items + " Items",
+                    function (confirmed) {
+                        if (confirmed) {
+                            db_add_stock_list(obj, function (failed_count, msg) {
+                                if (failed_count) {
+                                    sweetAlert(failed_count + " items failed to be added to list.", "Please verify the list correctly", "error");
+                                } else {
+                                    sweetAlert("", "Added all items to database");
+                                }
+                            });                                      
+                        }
+                        else {
+                            sweetAlert("", confirmed ? "confirmed" : "cancelled");
+                        }
+                    });
+            }
+            function validate_incoming_stock_list() {
+                return true;
             }
         </script>
         <div class="input_table_form">
@@ -432,21 +443,30 @@
                     </tr>
                     <tr>
                         <td>
-                            <select id="incoming_item_options" required></select>
+                            <select id="incoming_item_options" 
+                                    tabindex="1"
+                                    required>
+
+                            </select>
                         </td>
                         <td>
                             <input name="quantity" placeholder="quantity in Kgs"
                                    type="number" step="0.001" max="2500" min=".001"
+                                   tabindex="2"
                                    required />
                         </td>
                         <td>
                             <input name="price" placeholder="price in Rs"
                                    type="number" step="1" max="250000" min="1"
+                                   tabindex="3"
                                    required />
                         </td>
                     </tr>
                 </table> <br />
-                <input type="button" value="Add Item" onclick="AddItem()" />
+                <input type="button" 
+                       value="Add Item" 
+                       onclick="AddItem()" 
+                       tabindex="4"/>
                 <input type="button" value="Delete Last Item" onclick="DeleteLastItem()" />                
                 <input type="submit" value="Submit" />
             </form>
