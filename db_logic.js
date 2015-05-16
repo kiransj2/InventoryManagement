@@ -279,7 +279,7 @@ function get_item_id(name, callback) {
 }
 
 function get_item_list(callback) {
-    var stmt = format("SELECT item_id, name, dt FROM ITEMS");
+    var stmt = format("SELECT item_id, name, dt FROM ITEMS ORDER BY LOWER(name)");
     log(stmt);
     db.db_execute_query(stmt, function(err, rows) {
         if(err) {

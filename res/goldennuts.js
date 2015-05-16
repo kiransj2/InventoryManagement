@@ -87,9 +87,9 @@ function db_get_all_items(callback) {
 }
 
 function get_item_table_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Number</th><th>Item Name</th><th>Added On</th></tr>";
+    var table = "<table class='TColor'><tr><th>Item Name(total:"+rows.length+")</th><th>Added On</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        table += "<tr><td>" + rows[i].item_id + "</td><td>" + rows[i].name +
+        table += "<tr><td>" + rows[i].name +
                                  "</td><td>" + rows[i].dt + "</td></tr>";
     }
     table += "</table>";
@@ -323,12 +323,17 @@ function db_list_current_stocks(callback) {
 }
 
 function get_current_stocks_from_json_ui(show_zeros, rows) {
-    var total_stocks = 0;
+    var total_stocks = 0, total_zero = 0;
     for (var i = 0; i < rows.length; i++) {
         total_stocks += rows[i].quantity;
+        if (!rows[i].quantity) {
+            total_zero++;
+        }
     }
     total_stocks = total_stocks / 1000;
-    var table = "<table class='TColor'><tr><th>Item Name</th><th>Current Stocks (" + total_stocks + " Kg)</th></tr>";
+    var table = "<table class='TColor'><tr>";
+    table += "<th>Items (total:" + (rows.length - total_zero) + ", zero:"+ total_zero +")</th>";
+    table += "<th> CurrentStocks (" + total_stocks + " Kg) </th></tr> ";
     for (var i = 0; i < rows.length; i++) {
         if ((rows[i].quantity != 0) || show_zeros) {
             var weight = 0;
