@@ -144,7 +144,7 @@ function get_incoming_stocks_range_from_json_ui(rows) {
         total_stocks += rows[i].quantity;
     }
     total_stocks = total_stocks / 1000;
-    var table = "<table class='TColor'><tr><th>Order ID ( total: " + rows.length + " )</th><th>Name</th>";
+    var table = "<table class='TColor'><tr><th>OrderID (total: " + rows.length + ")</th><th>Name</th>";
     table += "<th>Quantity ( " + total_stocks + " Kg )</th><th>Paid (Rs " + total_cost + ")</th><th>Date</th><th>Time</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         
@@ -246,8 +246,8 @@ function get_outgoing_stocks_range_from_json_ui(rows) {
     total_stocks = total_stocks / 1000;
 
     var table = "<table class='TColor'>"
-    table += "<tr><th> Order Id (total:"+ rows.length +")</th><th>Name</th><th>Quantity (" + total_stocks + " Kg)</th>";
-    table += "<th>Paid (Rs " + total_cost +")</th><th>Date</th><th>Time</th><th>Order type</th><th>Reason</th></tr>";
+    table += "<tr><th> OrderId (total:"+ rows.length +")</th><th>Name</th><th>Quantity(" + total_stocks + " Kg)</th>";
+    table += "<th>Paid(Rs " + total_cost +")</th><th>Date</th><th>Time</th><th>Order type</th><th>Reason</th></tr>";
     
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
@@ -316,6 +316,8 @@ function get_current_stocks_from_json_ui(show_zeros, rows) {
             var td = "<td>";
             if (rows[i].quantity == 0) {
                 td = "<td bgcolor='#FF0000'>";
+            } else if (rows[i].quantity < 3000) {
+                td = "<td bgcolor='#F07000'>";
             }
             
             table += "<tr>" + td + rows[i].name + "</td>" + td + (weight) + "</td></tr>";
