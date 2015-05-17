@@ -22,35 +22,6 @@ function ajaxRequest(url, callback) {
     return;
 }
 
-function ajaxRequestPost(obj, url, callback) {
-    var is_firefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-    var xmlhttp = new XMLHttpRequest();
-    //var xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            callback(false, xmlhttp.responseText);
-        }
-        else if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
-            callback(true, xmlhttp.responseText);
-        }
-        return;
-    }
-    if (is_firefox) {
-        xmlhttp.timeout = 2000;
-        xmlhttp.ontimeout = function () {
-            callback(true, "Server not responding");
-        }
-    }
-    
-    //xmlhttp.setRequestHeader('Content-Type', 'application/json');
-    
-    //xmlhttp.overrideMimeType("text/plain");
-    xmlhttp.open("POST", url, true);
-    xmlhttp.send(JSON.stringify(obj));
-    
-    return;
-}
-
 function validate_item_name(name) {
     if (name === "") return false;
     if (name.length < 5) return false;
@@ -434,6 +405,28 @@ function db_add_stock_list(obj, callback) {
             }
             if ((failed + items_added) == obj.size) {
                 callback(failed, "Added " + items_added + ", failed " + failed);
+            }
+        });
+    }
+}
+
+function db_sell_stock_list(obj, callback) {
+    var size = obj.size;
+    var items_added = 0, failed = 0;
+    for (var i = 0; i <= obj.size; i++) {
+        var name = obj.item[i].name;
+        var quantity = obj.item[i].quantity * 1000;
+        var price = obj.item[i].price;
+        var url = "/api/sell_stock?name=" + name + "&quantity=" + quantity + "&price=" + price;
+        url += "&option=" + obj.option + "&reason=" + obj.reason;
+        ajaxRequest(url, function (error, data) {
+            if (error == true) {
+                failed++;
+            } else {
+                items_added++;
+            }
+            if ((failed + items_added) == obj.size) {
+                callback(failed, "Sold " + items_added + ", failed " + failed);
             }
         });
     }

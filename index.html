@@ -107,7 +107,7 @@
                             return;
                         }
                         set_data_section(t + "<br/><br/>" + table);
-                        set_header_section("Outgoing Stocks Today's Summary");
+                        set_header_section("Sales Summary for today");
                     });
                 } else {
                     var str = "";
@@ -124,7 +124,7 @@
                             return;
                         }
                         set_data_section(t + "<br/><br/>" + table);
-                        set_header_section("Outgoing Stocks (" + str + ")");
+                        set_header_section("Sales (" + str + ")");
                     });
                 }
             }
@@ -151,7 +151,7 @@
 
                     get_options_with_item_list(false, "incoming_item_options");
                     set_data_section(document.getElementById('incoming_stock').innerHTML);
-                    set_header_section("New Incoming Stock");
+                    set_header_section("Add Incoming Stock");
                 });
             }
 
@@ -164,9 +164,9 @@
                         return;
                     }
 
-                    get_options_with_item_list(true /*Get STocks*/, "itemlist_outgoing");
+                    get_options_with_item_list(true /*Get STocks*/, "outgoing_item_options");
                     set_data_section(document.getElementById('outgoing_stock').innerHTML);
-                    set_header_section("New Outgoing Stock");
+                    set_header_section("Sell Stock");
                 });
             }
 
@@ -316,13 +316,14 @@
     <!--This part contains the incoming_stocks UI Hidden by default. -->
     <div id="incoming_stock" style="display: none;">
         <script type="text/javascript">
-            function AddItem() {                
+            function Incoming_AddItem() {
                 var table = document.getElementById("incoming_table");
                 var row = table.insertRow(table.rows.length);
                 row.innerHTML = table.rows[1].innerHTML;
+                row.cells[3].childNodes[1].innerHTML = table.rows.length - 1;
             }
 
-            function DeleteLastItem() {
+            function Incoming_DeleteLastItem() {
                 var table = document.getElementById("incoming_table");
                 if (table.rows.length > 2) {
                     table.deleteRow(table.rows.length - 1);
@@ -360,7 +361,7 @@
                             });                                      
                         }
                         else {
-                            sweetAlert("", confirmed ? "confirmed" : "cancelled");
+                            sweetAlert("Cancelled adding stock", "");
                         }
                     });
             }
@@ -377,6 +378,7 @@
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Price Paid</th>
+                        <th>Item Number</th>
                     </tr>
                     <tr>
                         <td>
@@ -398,98 +400,117 @@
                                    tabindex="3"
                                    required />
                         </td>
+                        <td>
+                            <label id="item_number" style="color:black;">1</label>
+                        </td>
                     </tr>
                 </table> <br />
-                <input type="button" value="Add Another Item" onclick="AddItem()" tabindex="4"/>
-                <input type="button" value="Delete Last Item" onclick="DeleteLastItem()" />                
+                <input type="button" value="Add Another Item" onclick="Incoming_AddItem()" tabindex="4"/>
+                <input type="button" value="Delete Last Item" onclick="Incoming_DeleteLastItem()" />                
                 <input type="submit" value="Submit" />
             </form>
         </div>
     </div>
 
-    <!--This part contains the outgoing stocks UI Hidden by default. -->
     <div id="outgoing_stock" style="display: none;">
         <script type="text/javascript">
-            function validate_incoming_stock_data() {
-                var name = document.forms['outgoing_stock']['itemlist_outgoing'].value;
-                var option = document.forms['outgoing_stock']['outgoing_option'].value;
-                var quantity = document.forms['outgoing_stock']['quantity'].value;
-                var reason = document.forms['outgoing_stock']['reason'].value;
-                var price = document.forms['outgoing_stock']['price'].value;
+            function AddItem() {
+                var table = document.getElementById("outgoing_table");
+                var row = table.insertRow(table.rows.length);
+                row.innerHTML = table.rows[1].innerHTML;
+                row.cells[1].childNodes[1].max = 0;
+                row.cells[1].childNodes[1].min = 0;                
+                row.cells[3].childNodes[1].innerHTML = table.rows.length-1;
+            }
+
+            function DeleteLastItem() {
+                var table = document.getElementById("outgoing_table");
+                if (table.rows.length > 2) {
+                    table.deleteRow(table.rows.length - 1);
+                }
+            }
+
+            function outgoing_stock_list_action() {
+                var obj = {};
+                var total_quantity = 0, total_cost = 0, total_items = 0;
+                var table = document.getElementById("outgoing_table");
+
+                obj.size = table.rows.length - 1;
+                obj.reason = document.forms['outgoing_stock']['outgoing_reason'].value;
+                obj.option = document.forms['outgoing_stock']['outgoing_option'].value;                
+                
+                obj.item = [];
+                for (var i = 1; i < table.rows.length; i++) {
+                    var item = {};
+                    item.name = table.rows[i].cells[0].childNodes[1].value;
+                    item.quantity = parseFloat(table.rows[i].cells[1].childNodes[1].value);
+                    item.price = parseInt(table.rows[i].cells[2].childNodes[1].value);
+                    obj.item.push(item);
+                    total_quantity += item.quantity;
+                    total_cost += item.price;
+                    total_items++;
+                }
+                confirmAction(
+                    "Total " + total_quantity + " KG, " + total_cost + " Rs",
+                    "Summary for " + total_items + " Items, for " + obj.option + "("+obj.reason +")",
+                    function (confirmed) {
+                        if (confirmed) {
+                            db_sell_stock_list(obj, function (failed_count, msg) {
+                                if (failed_count) {
+                                    sweetAlert(failed_count + " items failed to be added to list.", "Please verify the list correctly", "error");
+                                } else {
+                                    sweetAlert("", "Sold " + total_items + " items");
+                                }
+                            });
+                        }
+                        else {
+                            sweetAlert("Cancelled Selling", "");
+                        }
+                    });
+            }
+
+            function validate_outgoing_stock_list() {
                 return true;
             }
 
-            function outgoing_stock_action() {
-                var name = document.forms['outgoing_stock']['itemlist_outgoing'].value;
-                var option = document.forms['outgoing_stock']['outgoing_option'].value;
-                var quantity = document.forms['outgoing_stock']['quantity'].value;
-                var reason = document.forms['outgoing_stock']['reason'].value;
-                var price = document.forms['outgoing_stock']['price'].value;
-
-                var text = "Confirm to Sell " + quantity + " KGs of '" +
-                            name + "' to " + option + "at Rs " + price;
-
-                confirmAction("", text, function (confirmed) {
-                    if (!confirmed) {
-                        sweetAlert("", "Cancelled Adding Outgoing Stock", "warning");
-                        return;
-                    }
-                    var obj = {};
-                    obj.name = name;
-                    obj.option = option;
-                    obj.quantity = quantity * 1000;
-                    obj.reason = reason;
-                    obj.price = price;
-
-                    db_sell_stock(obj, function (error, msg) {
-                        if (error === false) {
-                            sweetAlert("", "Sold " + quantity + " KG of " + name + " to " + option, "success");
-                            document.getElementById('data').innerHTML = "";
-                        } else {
-                            document.getElementById('data').innerHTML = "Error: Unable to sell due to " + msg;
-                            sweetAlert("", "Error: Unable to sell due to " + msg, "error");
+            function update_table_quantity(item_name) {
+                var table = document.getElementById("outgoing_table");
+                var index = 0;
+                for (var i = 1; i < table.rows.length; i++) {                    
+                    var name = table.rows[i].cells[0].childNodes[1].value;
+                    if (name == item_name) {
+                        if (index) {
+                            sweetAlert('Item ' + name + " already exists at index " + index, "Please update existing item", "error");
+                            return;
                         }
-                    });
-                });
-            }
-            function update_quantity(value) {
-
-                db_get_current_stocks_of(value, function (err, rows) {
-                    if (err) {
-                        sweetAlert("", "Unable to get stocks of " + value, "error");
-                        return;
+                        index = i;
+                        db_get_current_stocks_of(name, function (err, rows) {
+                            if (err) {
+                                sweetAlert("", "Unable to get stocks of " + value, "error");
+                                return;
+                            }                            
+                            table.rows[index].cells[1].childNodes[1].max = (rows[0].quantity / 1000);
+                            if (rows[0].quantity > 1000) {
+                                weight = (rows[0].quantity / 1000) + " Kgs";
+                            } else {
+                                weight = (rows[0].quantity) + " gms";
+                            }
+                            document.getElementById('stock_level_label').innerHTML =
+                                "Available stocks for " + name + " " + weight;
+                        });                        
                     }
-                    //sweetAlert("", "Current Stocks of " + value + " is " + rows[0].quantity);
-                    var obj = document.forms['outgoing_stock']['quantity'];
-                    obj.max = rows[0].quantity/1000;
-                    document.getElementById('stock_level_label').innerHTML = "Available stocks " + (rows[0].quantity/1000) + " Kgs";
-                });
+                }
             }
         </script>
-        <div class="input_form">
+        <div class="outgoing_table_form">
             <form name='outgoing_stock'
-                  action='javascript:outgoing_stock_action()'
-                  onsubmit='return validate_incoming_stock_data()'>
+                  action='javascript:outgoing_stock_list_action()'
+                  onsubmit='return validate_outgoing_stock_list()'>
+                <label id="stock_level_label" 
+                       for="qunatity"
+                       style="color:red;">
 
-                <h1> Outgoing Stocks </h1>
-                <label id="stock_level_label" for="qunatity">  </label>
-                <select id="itemlist_outgoing" name="itemlist"
-                        onchange="update_quantity(this.value)"
-                        tabindex="1"
-                        required/>
-
-                <input type="number" step="0.001" min="0"
-                       max="2500" name='quantity' id='tags'
-                       placeholder="quantity in Kgs"
-                       tabindex="2"
-                       required />
-
-                <input type="number" step="1" min="10"
-                       max="500000" name='price' id='tags'
-                       placeholder="price in Rs"
-                       tabindex="3"
-                       required />
-
+                </label>
                 <select name="outgoing_option" 
                         tabindex="4"
                         required>
@@ -500,13 +521,41 @@
                     <option>Wastage</option>
                     <option>Others</option>
                 </select>
-                <input type="text" name='reason' id='tags'
-                       tabindex="5"
-                       placeholder="reason" />
-                <br /><br />
-                <input type="submit" value="Submit" tabindex="6"/>
+                <input type="text" name="outgoing_reason" placeholder="Enter BillNumber/Hotel/Distributor" required />
+                <table class='TColor' id="outgoing_table">
+                    <tr>                        
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Item Number</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="outgoing_item_options" tabindex="1"
+                                    onchange="update_table_quantity(this.value)"
+                                    required/>
+                        </td>
+                        <td>
+                            <input name="quantity" placeholder="quantity in Kgs"
+                                   type="number" step="0.001" max="0" min="0"
+                                   tabindex="2" required />
+                        </td>
+                        <td>
+                            <input name="price" placeholder="price in Rs"
+                                   type="number" step="1" max="250000" min="1"
+                                   tabindex="3" required />
+                        </td>
+                        <td>
+                            <label id="item_number" style="color:black;">1</label>
+                        </td>
+                    </tr>
+                </table> <br />
+                <input type="button" value="Add Another Item" onclick="AddItem()" tabindex="4" />
+                <input type="button" value="Delete Last Item" onclick="DeleteLastItem()" />
+                <input type="submit" value="Submit" />
             </form>
         </div>
     </div>
+
 </body>
 </html>
