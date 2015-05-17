@@ -285,8 +285,8 @@
                     }
                     
                     db_add_new_item(name, function (error, msg) {
-                        if (error === false) {
-                            document.getElementById('data').innerHTML = "";
+                        if (error === false) {                            
+                            set_data_section("");
                             sweetAlert("", "Item '" + name + "' added to database", "success");
                         } else {
                             sweetAlert("oops!", "Item '" + name + "' already exists in database!!", "error");
@@ -354,9 +354,10 @@
                         if (confirmed) {
                             db_add_stock_list(obj, function (failed_count, msg) {
                                 if (failed_count) {
-                                    sweetAlert(failed_count + " items failed to be added to list.", "Please verify the list correctly", "error");
+                                    sweetAlert(failed_count + " items failed to be added to database.", "Please verify the list correctly", "error");
                                 } else {
                                     sweetAlert("", "Added all items to database");
+                                    set_data_section("");
                                 }
                             });                                      
                         }
@@ -457,9 +458,10 @@
                         if (confirmed) {
                             db_sell_stock_list(obj, function (failed_count, msg) {
                                 if (failed_count) {
-                                    sweetAlert(failed_count + " items failed to be added to list.", "Please verify the list correctly", "error");
+                                    sweetAlert(failed_count + " items failed to be added to database.", "Please verify the list correctly", "error");
                                 } else {
                                     sweetAlert("", "Sold " + total_items + " items");
+                                    set_data_section("");
                                 }
                             });
                         }
@@ -554,6 +556,7 @@
                 <input type="button" value="Delete Last Item" onclick="DeleteLastItem()" />
                 <input type="submit" value="Submit" />
             </form>
+            <input type="date"/>
         </div>
     </div>
 

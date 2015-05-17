@@ -4,8 +4,8 @@ var db_logic = require("./db_logic");
 var util = require("util");
 var fs = require("fs");
 
-var db_file = "./db_data/mydb.db";
-var db_log_file = "./db_data/sql.log";
+var db_file = "../db/goldennuts.db";
+var db_log_file = "../db/goldennuts.sql";
 
 
 var format = util.format;

@@ -8,8 +8,10 @@ var sqlite3 = require("sqlite3");
 var format = util.format;
 
 var test_db_path = "db/test_db.db";
-db.db_set_path(test_db_path);
+var test_db_log_file = "db/test_db.sql";
 
+db.db_set_path(test_db_path);
+db.db_set_logfile_path(test_db_log_file);
 function assert(cond, msg) {
     if (cond) {
         console.error(msg);

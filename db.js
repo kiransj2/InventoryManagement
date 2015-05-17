@@ -7,8 +7,8 @@ var fs = require("fs"),
 
 // Global Variables
 var db;
-var repository = "./db/mydb.db";
-var SQL_LOG_FILE = "./db/log.sql"
+var repository = "../db/goldennuts.db";
+var SQL_LOG_FILE = "../db/goldennuts.sql"
 
 function db_set_db_path(path) {
     repository = path;

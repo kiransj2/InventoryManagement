@@ -10,9 +10,6 @@ var hostname = os.hostname();
 var port = 80;
 var server;
 
-db.db_set_path("./db_data/mydb.db");
-db.db_set_logfile_path("./db_data/sql.log");
-
 if(!db.db_init(false)) {
     console.error("unable to open database file");
     process.exit(1);
