@@ -15,6 +15,11 @@ if(!db.db_init(false)) {
     process.exit(1);
 }
 
+/* Set the user name and password*/
+var basicAuth = require('basic-auth-connect');
+app.use(basicAuth('goldennuts', 'Temple'));
+
+
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
 });

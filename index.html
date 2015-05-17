@@ -205,40 +205,12 @@
                 document.getElementById('header').remove();
             }
 
-            function checkUser() {
-                    swal({
-                        title: "Enter Password",
-                        text: "",
-                        type: "input",
-                        inputType: "password",
-                        showCancelButton: true,
-                        closeOnConfirm: false,
-                        animation: "slide-from-top",
-                        inputPlaceholder: "Write something"
-                    },
-                    function (inputValue) {
-                        if (inputValue === false) {
-                            clearPage();
-                            return false;
-                        }
-
-                        if (inputValue !== "temple") {
-                            swal.showInputError("Your password is wrong!");
-                        } else {
-                            swal.close();
-                        }
-
-                        return true;
-
-                    });
-            }
-
             function show_calculator() {
                 set_data_section(document.getElementById('calculator').innerHTML);;
             }
         </script>
     </head>
-<body onload="checkUser1()">
+<body>
 
     <div id="header">
         <h1 id="header_">The Golden Nuts</h1>
@@ -261,12 +233,9 @@
         <hr />
     </div>
 
-    <div id="data">      
-    </div>
+    <div id="data"></div>
 
-    <div id="footer">
-        <p> </p>
-    </div>
+    <div id="footer"><p/></div>
 
     <!--This part contains the new item UI Hidden by default. -->
     <div id="new_item" style="display: none;">
@@ -419,6 +388,7 @@
         </div>
     </div>
 
+    <!--This part contains the Sell item UI Hidden by default. -->
     <div id="outgoing_stock" style="display: none;">
         <script type="text/javascript">
             function AddItem() {
@@ -565,6 +535,7 @@
         </div>
     </div>
 
+    <!--This part contains the Basic Calculator UI Hidden by default. -->
     <div id="calculator" style="display: none;">
         <script>
             function update_results(value) {

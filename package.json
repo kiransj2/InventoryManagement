@@ -7,7 +7,12 @@
     "name": "Kiran S J",
     "email": "kiransj@outlook.com"
   },
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/kiransj2/InventoryManagement.git"
+  },
   "dependencies": {
+    "basic-auth-connect": "^1.0.0",
     "express": "^4.12.3",
     "moment": "^2.10.2",
     "sqlite3": "^3.0.7"
