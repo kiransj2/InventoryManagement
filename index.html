@@ -232,6 +232,10 @@
 
                     });
             }
+
+            function show_calculator() {
+                set_data_section(document.getElementById('calculator').innerHTML);;
+            }
         </script>
     </head>
 <body onload="checkUser1()">
@@ -252,6 +256,7 @@
         <a onclick="add_outgoing_stock()" href="javascript:void(0);">Sell Stock</a><br>
         <hr />
         <a href="/" target="_blank">New Tab</a><br>
+        <a onclick="show_calculator()" href="javascript:void(0);">Calculator</a><br>
         <a onclick="shutdown_server()" href="javascript:void(0);">Close Server</a><br>
         <hr />
     </div>
@@ -392,7 +397,7 @@
                         </td>
                         <td>
                             <input name="quantity" placeholder="quantity in Kgs"
-                                   type="number" step="0.001" max="2500" min=".001"
+                                   type="number" step="0.001" max="750" min=".001"
                                    tabindex="2"
                                    required />
                         </td>
@@ -560,5 +565,34 @@
         </div>
     </div>
 
+    <div id="calculator" style="display: none;">
+        <script>
+            function update_results(value) {
+                document.getElementById('output').innerHTML = value + " gms ====> " + (value / 1000) + " Kg";
+            }
+        </script>
+        <table class="TColor">
+            <tr>
+                <th>Conversion</th>
+                <th>Data</th>
+                <th>Output</th>
+            </tr>
+            <tr>
+                <td>
+                    Convert grams to convert to KG
+                </td>
+                <td>
+                    <input type="number"
+                           placeholder="Enter gms to convert to kg"
+                           onchange="update_results(this.value)"
+                           step="1"
+                           min="0" />                    
+                </td>
+                <td>
+                    <label id="output" style="color:blue"></label>
+                </td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>
