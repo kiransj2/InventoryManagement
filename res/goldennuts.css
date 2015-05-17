@@ -128,7 +128,7 @@
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
     -webkit-appearance: none;
-    margin: 0;
+    margin: 0;    
 }
 
 input[type=number] {
@@ -142,8 +142,7 @@ select {
   margin-bottom: 10px;
   padding: 0 0px;   
   box-sizing: border-box;
-  text-align:left;
-  align-self:flex-end   ;
+  text-align:left;  
 }
 
 input {
@@ -153,8 +152,7 @@ input {
   margin-bottom: 10px;
   padding: 0 0px;   
   box-sizing: border-box;
-  text-align:left;
-  align-self:flex-end   ;
+  text-align:left;  
 }
 
 

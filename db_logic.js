@@ -540,7 +540,7 @@ function get_all_outgoing_stock_range(when, callback) {
 }
 
 function get_current_stocks(callback) {
-    var stmt = format("SELECT * FROM current_stocks");
+    var stmt = format("SELECT * FROM current_stocks order by lower(name)");
     log(stmt);
     
     db.db_execute_query(stmt, function (err, rows) {
