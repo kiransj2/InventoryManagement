@@ -97,8 +97,8 @@ function get_incoming_stocks_from_json_ui(rows) {
         total_stocks += rows[i].quantity;
     }
     total_stocks = total_stocks / 1000;
-    var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
-    table += "<th>Incoming Quantity (" + total_stocks + " Kg)</th><th>Cost Paid (total : " + total_cost + ")</th><th>date</th></tr>";
+    var table = "<table class='TColor'><tr><th>Name (total: " + rows.length + ")</th>";
+    table += "<th>Quantity (" + total_stocks + " Kg)</th><th>Paid (Rs " + total_cost + ")</th><th>Date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].quantity < 1000) {
@@ -144,8 +144,8 @@ function get_incoming_stocks_range_from_json_ui(rows) {
         total_stocks += rows[i].quantity;
     }
     total_stocks = total_stocks / 1000;
-    var table = "<table class='TColor'><tr><th>Transaction ID ( total: " + rows.length + " )</th><th>Item Name</th>";
-    table += "<th>Incoming Quantity ( " + total_stocks + " Kg )</th><th>Cost Paid ( total : " + total_cost + ")</th><th>date</th><th>Time</th></tr>";
+    var table = "<table class='TColor'><tr><th>Order ID ( total: " + rows.length + " )</th><th>Name</th>";
+    table += "<th>Quantity ( " + total_stocks + " Kg )</th><th>Paid (Rs " + total_cost + ")</th><th>Date</th><th>Time</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         
         var weight = 0;
@@ -209,7 +209,7 @@ function get_outgoing_stocks_from_json_ui(rows) {
     }
     total_quantity = total_quantity/1000;
     var table = "<table class='TColor'><tr><th>Item Name (total: " + rows.length + ")</th>";
-    table += "<th>Sold Quantity (" + total_quantity + " Kg)</th><th>Cost Paid ( total: " + total_cost + ")</th><th>date</th></tr>";
+    table += "<th>Quantity (" + total_quantity + " Kg)</th><th>Paid (Rs " + total_cost + ")</th><th>Date</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].quantity < 1000) {
@@ -246,8 +246,8 @@ function get_outgoing_stocks_range_from_json_ui(rows) {
     total_stocks = total_stocks / 1000;
 
     var table = "<table class='TColor'>"
-    table += "<tr><th> Id(total:"+ rows.length +")</th><th>Item Name</th><th>Sold Quantity(" + total_stocks + " Kg)</th>";
-    table += "<th>Cost Paid(total:" + total_cost +")</th><th>Date</th><th>Time</th><th>Transaction type</th><th>Reason</th></tr>";
+    table += "<tr><th> Order Id (total:"+ rows.length +")</th><th>Name</th><th>Quantity (" + total_stocks + " Kg)</th>";
+    table += "<th>Paid (Rs " + total_cost +")</th><th>Date</th><th>Time</th><th>Order type</th><th>Reason</th></tr>";
     
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
@@ -304,7 +304,7 @@ function get_current_stocks_from_json_ui(show_zeros, rows) {
     total_stocks = total_stocks / 1000;
     var table = "<table class='TColor'><tr>";
     table += "<th>Items (total:" + (rows.length - total_zero) + ", zero:"+ total_zero +")</th>";
-    table += "<th> CurrentStocks (" + total_stocks + " Kg) </th></tr> ";
+    table += "<th> Current Stocks (" + total_stocks + " Kg) </th></tr> ";
     for (var i = 0; i < rows.length; i++) {
         if ((rows[i].quantity != 0) || show_zeros) {
             var weight = 0;
@@ -357,4 +357,77 @@ function shutdown_server() {
         document.getElementById('footer').remove();
         document.getElementById('header').remove();
     });
+}
+
+function get_options_with_item_list(stocks, select_id, callback) {
+    
+    function handle_data(error, rows) {
+        var data;
+        if (!error) {        
+            var x = document.getElementById(select_id);
+            // Clear the existings element from the options
+            // and then add the new options values.
+            x.innerHTML = "";
+            for (var i = 0; i < rows.length; i++) {
+                if (!stocks || (rows[i].quantity != 0)) {
+                    var o = document.createElement('option');
+                    o.value = rows[i].name;
+                    o.text = rows[i].name;
+                    x.options.add(o);
+                }
+            }
+            x.innerHTML = "<option disabled selected> -- choose an item -- </option>" + x.innerHTML;
+            //set_data_section(document.getElementById('incoming_stock').innerHTML);        
+        }
+        callback(error);
+    }
+    
+    if (stocks)
+        db_list_current_stocks(handle_data);
+    else
+        db_get_all_items(handle_data);
+}
+
+
+function db_add_stock_list(obj, callback) {
+    var size = obj.size;
+    var items_added = 0, failed = 0;
+    for (var i = 0; i <= obj.size; i++) {
+        var name = obj.item[i].name;
+        var quantity = obj.item[i].quantity*1000;
+        var price = obj.item[i].price;
+        var url = "/api/add_stock?name=" + name + "&quantity=" + quantity + "&price=" + price;
+        ajaxRequest(url, function (error, data) {
+            if (error == true) {
+                failed++;
+            } else {
+                items_added++;
+            }
+            if ((failed + items_added) == obj.size) {
+                callback(failed, "Added " + items_added + ", failed " + failed);
+            }
+        });
+    }
+}
+
+function db_sell_stock_list(obj, callback) {
+    var size = obj.size;
+    var items_added = 0, failed = 0;
+    for (var i = 0; i <= obj.size; i++) {
+        var name = obj.item[i].name;
+        var quantity = obj.item[i].quantity * 1000;
+        var price = obj.item[i].price;
+        var url = "/api/sell_stock?name=" + name + "&quantity=" + quantity + "&price=" + price;
+        url += "&option=" + obj.option + "&reason=" + obj.reason;
+        ajaxRequest(url, function (error, data) {
+            if (error == true) {
+                failed++;
+            } else {
+                items_added++;
+            }
+            if ((failed + items_added) == obj.size) {
+                callback(failed, "Sold " + items_added + ", failed " + failed);
+            }
+        });
+    }
 }

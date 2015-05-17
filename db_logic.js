@@ -367,7 +367,7 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
 
 function get_all_incoming_stock_on(when, callback) {
     var date = moment(when, "YYYY-MM-DD").format("YYYY-MM-DD");
-    var stmt = format("SELECT * from incoming_stocks_view where dt = '%s'", date);
+    var stmt = format("SELECT * from incoming_stocks_view where dt = '%s' order by lower(name)", date);
     log(stmt);
 
     db.db_execute_query(stmt, function (err, rows) {
@@ -393,7 +393,7 @@ function get_all_incoming_stock_summary_range(when, callback) {
     else if (when == 'today')
         date = moment().subtract(1, 'days');
     
-    var stmt = format("SELECT * from incoming_stocks_view where dt > '%s'", date.format('YYYY-MM-DD'));
+    var stmt = format("SELECT * from incoming_stocks_view where dt > '%s' order by lower(name)", date.format('YYYY-MM-DD'));
     log(stmt);
     
     db.db_execute_query(stmt, function (err, rows) {
