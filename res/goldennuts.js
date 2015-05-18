@@ -1,7 +1,8 @@
+//This functions provices wrappers for ajax calls.
 function ajaxRequest(url, callback) {
     var is_firefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     var xmlhttp = new XMLHttpRequest();
-    //var xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             callback(false, xmlhttp.responseText);
@@ -29,7 +30,7 @@ function validate_item_name(name) {
     if (letter.test(name)) {
         return true;
     }
-    else {        
+    else {
         return false;
     }
     return false;
@@ -58,7 +59,7 @@ function db_get_all_items(callback) {
 }
 
 function get_item_table_from_json_ui(rows) {
-    var table = "<table class='TColor'><tr><th>Item Name(total:"+rows.length+")</th><th>Added On</th></tr>";
+    var table = "<table class='TColor'><tr><th>Name(total:"+rows.length+")</th><th>Added On</th></tr>";
     for (var i = 0; i < rows.length; i++) {
         table += "<tr><td>" + rows[i].name +
                                  "</td><td>" + rows[i].dt + "</td></tr>";
@@ -71,7 +72,7 @@ function db_get_items_table_ui(callback) {
     db_get_all_items(function (error, rows) {
         var data;
         if (error) {
-            data = "Error '" + rows + "'";            
+            data = "Error '" + rows + "'";
         } else {
             data = get_item_table_from_json_ui(rows);
         }
@@ -105,7 +106,7 @@ function get_incoming_stocks_from_json_ui(rows) {
             weight = "" + rows[i].quantity + " gms";
         } else {
             weight = "" + (rows[i].quantity / 1000) + " kg";
-        }  
+        }
         table += "<tr><td>" + rows[i].name + "</td><td>" + (weight) + "</td><td>";
         table += rows[i].price + "</td><td>" + rows[i].dt + "</td></tr>";
     }
@@ -113,13 +114,13 @@ function get_incoming_stocks_from_json_ui(rows) {
     return table;
 }
 
-function db_get_incoming_stocks(date, callback) {    
+function db_get_incoming_stocks(date, callback) {
     ajaxRequest("/api/get_incoming_stocks_on?date="+date, function (error, data) {
         if (error == true) {
             callback(true, "Unable to get incoming stocks");
             return;
         }
-        
+
         var obj = JSON.parse(data);
         callback(false, obj);
     });
@@ -137,7 +138,7 @@ function db_get_incoming_stocks_ui(date, callback) {
     });
 }
 
-function get_incoming_stocks_range_from_json_ui(rows) {    
+function get_incoming_stocks_range_from_json_ui(rows) {
     var total_cost = 0, total_stocks = 0;
     for (var i = 0; i < rows.length; i++) {
         total_cost += rows[i].price;
@@ -147,7 +148,7 @@ function get_incoming_stocks_range_from_json_ui(rows) {
     var table = "<table class='TColor'><tr><th>OrderID (total: " + rows.length + ")</th><th>Name</th>";
     table += "<th>Quantity ( " + total_stocks + " Kg )</th><th>Paid (Rs " + total_cost + ")</th><th>Date</th><th>Time</th></tr>";
     for (var i = 0; i < rows.length; i++) {
-        
+
         var weight = 0;
         if (rows[i].quantity < 1000) {
             weight = "" + rows[i].quantity + " gms";
@@ -162,13 +163,13 @@ function get_incoming_stocks_range_from_json_ui(rows) {
 }
 
 function db_get_incoming_stocks_range(range, callback) {
-    
+
     ajaxRequest("/api/get_incoming_stocks_range?range=" + range, function (error, data) {
         if (error == true) {
             callback(true, "Unable to get incoming stocks for 7 days");
             return;
         }
-        
+
         var obj = JSON.parse(data);
         var d = get_incoming_stocks_range_from_json_ui(obj);
         callback(false, d);
@@ -216,7 +217,7 @@ function get_outgoing_stocks_from_json_ui(rows) {
             weight = "" + rows[i].quantity + " gms";
         } else {
             weight = "" + rows[i].quantity / 1000 + " kgs";
-        }  
+        }
         table += "<tr><td>" + rows[i].name + "</td><td>" + weight + "</td><td>";
         table += rows[i].price + "</td><td>" + rows[i].dt + "</td></tr>";
     }
@@ -248,7 +249,7 @@ function get_outgoing_stocks_range_from_json_ui(rows) {
     var table = "<table class='TColor'>"
     table += "<tr><th> OrderId (total:"+ rows.length +")</th><th>Name</th><th>Quantity(" + total_stocks + " Kg)</th>";
     table += "<th>Paid(Rs " + total_cost +")</th><th>Date</th><th>Time</th><th>Order type</th><th>Reason</th></tr>";
-    
+
     for (var i = 0; i < rows.length; i++) {
         var weight = 0;
         if (rows[i].quantity < 1000) {
@@ -260,20 +261,20 @@ function get_outgoing_stocks_range_from_json_ui(rows) {
         table += rows[i].price + "</td><td>" + rows[i].dt + "</td><td>" + rows[i].tm;
         table += "</td><td>" + rows[i].transaction_type + "</td><td>" + rows[i].reason + "</td></tr>";
     }
-    
+
     table += "</table>";
     return table;
 }
 
 
 function db_get_outgoing_stocks_range(range, callback) {
-    
+
     ajaxRequest("/api/get_outgoing_stocks_range?range=" + range, function (error, data) {
         if (error == true) {
             callback(false, "Unable to get outgoing stocks for %s days", range);
             return;
         }
-        
+
         var obj = JSON.parse(data);
         var d = get_outgoing_stocks_range_from_json_ui(obj);
         callback(false, d);
@@ -319,7 +320,7 @@ function get_current_stocks_from_json_ui(show_zeros, rows) {
             } else if (rows[i].quantity < 3000) {
                 td = "<td bgcolor='#F07000'>";
             }
-            
+
             table += "<tr>" + td + rows[i].name + "</td>" + td + (weight) + "</td></tr>";
         }
     }
@@ -333,7 +334,7 @@ function db_list_currents_stocks_ui(show_zeros, callback) {
         var data;
         if (error) {
             data = "Error '" + rows + "'";
-        } else {            
+        } else {
             data = get_current_stocks_from_json_ui(show_zeros, rows);
         }
         callback(error, data);
@@ -342,7 +343,7 @@ function db_list_currents_stocks_ui(show_zeros, callback) {
 
 
 function db_get_current_stocks_of(item_name, callback) {
-    ajaxRequest("/api/get_stock_of?name="+ item_name, function (error, data) {        
+    ajaxRequest("/api/get_stock_of?name="+ item_name, function (error, data) {
         if (error == true) {
             callback(true, "Unable to get current stocks of item " + name);
             return;
@@ -362,10 +363,10 @@ function shutdown_server() {
 }
 
 function get_options_with_item_list(stocks, select_id, callback) {
-    
+
     function handle_data(error, rows) {
         var data;
-        if (!error) {        
+        if (!error) {
             var x = document.getElementById(select_id);
             // Clear the existings element from the options
             // and then add the new options values.
@@ -379,11 +380,11 @@ function get_options_with_item_list(stocks, select_id, callback) {
                 }
             }
             x.innerHTML = "<option disabled selected> -- choose an item -- </option>" + x.innerHTML;
-            //set_data_section(document.getElementById('incoming_stock').innerHTML);        
+            //set_data_section(document.getElementById('incoming_stock').innerHTML);
         }
         callback(error);
     }
-    
+
     if (stocks)
         db_list_current_stocks(handle_data);
     else

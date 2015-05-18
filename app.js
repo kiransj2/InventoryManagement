@@ -30,7 +30,7 @@ app.get('/res/*', function(req, res) {
 
 app.get('/api/get_item_list', function (req, res) {
     console.log("get_item_list --> ");
-    
+
     db_logic.item_list(function (error, json) {
         if (error) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -201,7 +201,7 @@ app.get('/api/get_stock_of', function (req, res) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end(json);
         } else {
-            res.writeHead(200, { 'Content-Type': 'application/json' });            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(json));
         }
         return;
@@ -214,11 +214,11 @@ app.get('/exit', function (req, res) {
     res.writeHead(200, { 'Content-Type': 'application/text' });
     res.end('done');
     db.db_exit();
-    setTimeout(function () {        
+    setTimeout(function () {
         process.exit(0);
     }, 2000);
 });
-    
+
 server = http.listen(port, function(){
     console.log("listening on http://%s:%d", hostname, port);
 });

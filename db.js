@@ -18,7 +18,7 @@ function db_set_logfile_path(path) {
     SQL_LOG_FILE = path;
 }
 
-// time_now function is used to get the cur_time 
+// time_now function is used to get the cur_time
 function date_time() {
     return moment().format('HH-mm-ss');
 }
@@ -36,10 +36,10 @@ function build_date(year, month, day) {
     return str;
 }
 
-function db_open(create_new) { 
+function db_open(create_new) {
     if (typeof db === 'undefined') {
         if (fs.existsSync(repository)) {
-            db = new sqlite3.Database(repository);                           
+            db = new sqlite3.Database(repository);
             return true;
         } else if (create_new) {
             db = new sqlite3.Database(repository, sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
@@ -92,10 +92,10 @@ function db_create_table(query, callback) {
             return;
         } else {
             console.warn("Was not expecting '%d' rows", rows.length);
-            callback(true);        
+            callback(true);
         }
         return;
-        
+
     });
 }
 

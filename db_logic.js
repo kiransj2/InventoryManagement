@@ -12,15 +12,15 @@ function log(msg) {
     }
 }
 function create_tables(client_callback) {
-    var create_items_table =  
-                "CREATE TABLE Items( " + 
+    var create_items_table =
+                "CREATE TABLE Items( " +
                 "item_id integer PRIMARY KEY autoincrement, " +
                 "name varchar(255) NOT NULL," +
                 "dt date NOT NULL default (date('now', 'localtime'))," +
                 "tm time NOT NULL default (time('now', 'localtime'))," +
                 "UNIQUE (name));";
 
-    var create_incoming_stock_table = 
+    var create_incoming_stock_table =
                 "CREATE TABLE incoming_stocks("+
                 "transaction_id integer PRIMARY KEY autoincrement,"+
                 "item_id integer NOT NULL,"+
@@ -30,7 +30,7 @@ function create_tables(client_callback) {
                 "tm time  NOT NULL default (time('now', 'localtime'))," +
                 "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
 
-    var create_incoming_stocks_view = 
+    var create_incoming_stocks_view =
                 "CREATE VIEW incoming_stocks_view AS " +
                 "SELECT stocks.item_id AS item_id, name, SUM(quantity) AS quantity, SUM(price) AS price, stocks.dt AS dt " +
                 "FROM incoming_stocks AS stocks " +
@@ -38,14 +38,14 @@ function create_tables(client_callback) {
                 "ON stocks.item_id = items.item_id " +
                 "GROUP BY name, stocks.item_id, stocks.dt " +
                 "ORDER BY dt DESC;";
-    
-    var create_total_incoming_stocks_view = 
+
+    var create_total_incoming_stocks_view =
                 "CREATE VIEW total_incoming_stocks_view AS " +
                 "SELECT item_id, name, SUM(quantity) AS quantity, SUM(price) AS price " +
                 "FROM incoming_stocks_view " +
                 "GROUP BY item_id ";
 
-    var create_outgoing_stocks_table = 
+    var create_outgoing_stocks_table =
                 "CREATE TABLE outgoing_stocks(" +
                 "transaction_id INTEGER PRIMARY KEY autoincrement," +
                 "transaction_type VARCHAR," +
@@ -56,8 +56,8 @@ function create_tables(client_callback) {
                 "dt date  NOT NULL default (date('now', 'localtime'))," +
                 "tm time  NOT NULL default (time('now', 'localtime'))," +
                 "FOREIGN KEY (item_id) REFERENCES Items(item_id));";
-    
-    var create_outgoing_stocks_view = 
+
+    var create_outgoing_stocks_view =
                 "CREATE VIEW outgoing_stocks_view AS " +
                 "SELECT stocks.item_id as item_id, name, SUM(quantity) as quantity, SUM(price) as price, stocks.dt as dt " +
                 "FROM outgoing_stocks as stocks " +
@@ -66,16 +66,16 @@ function create_tables(client_callback) {
                 "group by name, stocks.item_id, stocks.dt " +
                 "order by dt DESC ";
 
-    var create_total_outgoing_stock_view = 
+    var create_total_outgoing_stock_view =
                 "CREATE VIEW total_outgoing_stocks_view as " +
                 "SELECT item_id, name, SUM(quantity) as quantity, SUM(price) as price " +
                 "from outgoing_stocks_view " +
                 "group by item_id";
-    
-    var create_cur_stocks_levels_view = 
+
+    var create_cur_stocks_levels_view =
                 "CREATE VIEW current_stocks as " +
                 "SELECT incoming.item_id, incoming.name, " +
-                "(SUM(incoming.quantity) - SUM(outgoing.quantity)) as quantity " + 
+                "(SUM(incoming.quantity) - SUM(outgoing.quantity)) as quantity " +
                 "from total_incoming_stocks_view as incoming " +
                 "join total_outgoing_stocks_view as outgoing on incoming.item_id = outgoing.item_id " +
                 "group by incoming.item_id " +
@@ -83,24 +83,24 @@ function create_tables(client_callback) {
                 "SELECT item_id, name, quantity " +
                 "from total_incoming_stocks_view " +
                 "where item_id NOT in(SELECT item_id from total_outgoing_stocks_view) ";
-    
-    var create_transaction_history_view = 
+
+    var create_transaction_history_view =
                  "CREATE VIEW transaction_history AS " +
                  "SELECT name, 'incoming' as type, quantity, price, dt "+
                  "from incoming_stocks_view " +
                  "where dt = date('now') " +
                  "union " +
                  "SELECT name, 'outgoing' as type, quantity, price, dt " +
-                 "from outgoing_stocks_view " +                 
+                 "from outgoing_stocks_view " +
                  "order by name ";
-    
+
     function callback(error_count) {
         if (error_count) {
             console.error("Some table were not created");
             client_callback(error_count);
             return;
         }
-        
+
         var table = 2;
         db.db_new_table(create_cur_stocks_levels_view, function (err) {
             table--;
@@ -130,18 +130,18 @@ function create_tables(client_callback) {
     }
 
     var table_count = 7, error_count = 0;
-    
+
     db.db_new_table(create_items_table, function (err) {
         table_count--;
         if (err) {
             error_count++;
-            console.error("Error creating Items table");            
+            console.error("Error creating Items table");
         }
         if (!table_count) {
             callback(error_count);
         }
     });
-    
+
     db.db_new_table(create_outgoing_stocks_table, function (err) {
         table_count--;
         if (err) {
@@ -166,7 +166,7 @@ function create_tables(client_callback) {
                             callback(error_count);
                         }
                     });
-                }                
+                }
             });
         }
     });
@@ -209,15 +209,15 @@ function validate_item_name(name) {
     if (letter.test(name)) {
         return true;
     }
-    else {        
+    else {
         return false;
     }
     return false;
 }
 
 function insert_item_name(name, callback) {
-    if (!validate_item_name(name)) {        
-        log("'" + name + "' does not meet the requirements");      
+    if (!validate_item_name(name)) {
+        log("'" + name + "' does not meet the requirements");
         process.nextTick(function () {
             callback(true, "name'" + name + "' does not meet the requirements");
             return;
@@ -252,7 +252,7 @@ function get_item_name(id, callback) {
             callback(true, "No Element with id='" + id + "' found in db");
         } else {
             console.error("more than 1 name exists for id = %d", id);
-            callback(true, "more than 1 name exists for id = " + id);            
+            callback(true, "more than 1 name exists for id = " + id);
         }
         return;
     });
@@ -265,7 +265,7 @@ function get_item_id(name, callback) {
             callback(true, "Invalid id=" + id + ".");
             return;
         }
-        if (rows.length == 1) {            
+        if (rows.length == 1) {
             callback(false, rows[0].item_id);
         } else if (rows.length == 0) {
             log(format("No Element with name='%s' found in db", name));
@@ -306,7 +306,7 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
         });
         return;
     }
-   
+
     // Min of 1 gm and max of 250KG
     if ((quantity < 1) || (quantity > 2500000)) {
         log("quantity is not in range of 1gm to 2500KG");
@@ -315,7 +315,7 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
         });
         return;
     }
-    
+
     if (typeof price !== "number") {
         log(format("price is not numeric insted it is %s", typeof quantity));
         process.nextTick(function () {
@@ -323,7 +323,7 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
         });
         return;
     }
-    
+
     // Min of 1 gm and max of 250KG
     if ((price < 1) || (price > 500000)) {
         log("price is not in range of Rs 1 to 500000");
@@ -332,14 +332,14 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
         });
         return;
     }
-    
-  
+
+
     if ((null !== when) && !moment(when, "YYYY-MM-DD").isValid()) {
         log(format("date '%s' is not in the correct format", when));
         callback(true, format("date '%s' is not in the correct format", when));
         return;
     }
- 
+
     get_item_id(name, function (err, id) {
         if (err) {
             var msg = format("item name '%s' is invalid.", name);
@@ -349,7 +349,7 @@ function insert_incoming_stocks(name, quantity, price, when, callback) {
         }
         var stmt;
         var d = (when === null) ? db.db_date() : db.format_user_date(when);
-        stmt = format("INSERT INTO incoming_stocks (item_id, quantity, price, dt, tm) values(%d, %d, %d, '%s', '%s');", 
+        stmt = format("INSERT INTO incoming_stocks (item_id, quantity, price, dt, tm) values(%d, %d, %d, '%s', '%s');",
                        id, quantity, price, d, db.db_time());
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
@@ -392,10 +392,10 @@ function get_all_incoming_stock_summary_range(when, callback) {
         date = moment().subtract(30, 'days');
     else if (when == 'today')
         date = moment().subtract(1, 'days');
-    
+
     var stmt = format("SELECT * from incoming_stocks_view where dt > '%s' order by lower(name)", date.format('YYYY-MM-DD'));
     log(stmt);
-    
+
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             console.error("Query operation to fetch incoming_stocks failed %s", err);
@@ -425,7 +425,7 @@ function get_all_incoming_stock_range(when, callback) {
                        "where stocks.dt > date('%s') " +
                        "order by stocks.transaction_id DESC;" , date.format('YYYY-MM-DD'));
     log(stmt);
-    
+
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             console.error("Query operation to fetch incoming_stocks failed %s", err);
@@ -448,7 +448,7 @@ function insert_outgoing_stocks(obj, callback) {
         });
         return;
     }
-    
+
     if (typeof obj.price !== "number") {
         log(format("price is not numeric insted it is %s", typeof quantity));
         process.nextTick(function () {
@@ -462,7 +462,7 @@ function insert_outgoing_stocks(obj, callback) {
         callback(true, format("date '%s' is not in the correct format", obj.when));
         return;
     }
-    
+
     //TODO: Validate the stocks is not greater than Current Available stocks
 
     get_item_id(obj.name, function (err, id) {
@@ -475,7 +475,7 @@ function insert_outgoing_stocks(obj, callback) {
         var stmt;
         var d = (obj.when === null) ? db.db_date() : db.format_user_date(obj.when);
         stmt = format("INSERT INTO outgoing_stocks (transaction_type, item_id, quantity, price, reason, dt, tm) " +
-                      "values('%s', %d, %d, %d, '%s', '%s', '%s'); ", 
+                      "values('%s', %d, %d, %d, '%s', '%s', '%s'); ",
                       obj.option, id, obj.quantity, obj.price, obj.reason, d, db.db_time());
         log(stmt);
         db.db_execute_query(stmt, function (err, rows) {
@@ -496,7 +496,7 @@ function get_all_outgoing_stock_on(when, callback) {
     var date = moment(when, "YYYY-MM-DD").format("YYYY-MM-DD");
     var stmt = format("SELECT * FROM outgoing_stocks_view WHERE dt = '%s'", date);
     log(stmt);
-    
+
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             console.error("Query operation to fetch outgoing_stocks failed %s", err);
@@ -517,7 +517,7 @@ function get_all_outgoing_stock_range(when, callback) {
         date = moment().subtract(30, 'days');
     else if (when == 'today')
         date = moment().subtract(1, 'days');
-    
+
     var stmt = format("SELECT stocks.transaction_id, stocks.transaction_type, items.name, stocks.quantity, stocks.reason, stocks.price, stocks.dt, stocks.tm " +
                        "FROM outgoing_stocks AS stocks " +
                        "JOIN items AS items " +
@@ -525,7 +525,7 @@ function get_all_outgoing_stock_range(when, callback) {
                        "WHERE stocks.dt > date('%s') " +
                        "ORDER BY stocks.transaction_id DESC;" , date.format('YYYY-MM-DD'));
     log(stmt);
-    
+
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             console.error("Query operation to fetch outgoing_stocks_range failed %s", err);
@@ -542,7 +542,7 @@ function get_all_outgoing_stock_range(when, callback) {
 function get_current_stocks(callback) {
     var stmt = format("SELECT * FROM current_stocks order by lower(name)");
     log(stmt);
-    
+
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             var msg = format("Query operation to fetch current stocks failed %s", err);
@@ -560,7 +560,7 @@ function get_current_stocks(callback) {
 function get_stocks_of(item_name, callback) {
     var stmt = format("SELECT * FROM current_stocks WHERE name = '%s'", item_name);
     console.log(stmt);
-    
+
     db.db_execute_query(stmt, function (err, rows) {
         if (err) {
             var msg = format("Query operation to fetch stocks of '%s' failed due to %s", item_name, err);
@@ -569,7 +569,7 @@ function get_stocks_of(item_name, callback) {
         } else if (rows.length == 0) {
             var msg = format("Query operation to fetch stocks of '%s' returned nothing.", item_name);
             console.error(msg);
-            callback(true, msg);            
+            callback(true, msg);
         } else {
             console.log("current_stocks rows.length : %d", rows.length);
             callback(false, rows);
@@ -589,7 +589,7 @@ module.exports = {
 
     new_stock: insert_incoming_stocks,
     get_all_incoming_stock_on: get_all_incoming_stock_on,
-    get_all_incoming_stock_range: get_all_incoming_stock_range, 
+    get_all_incoming_stock_range: get_all_incoming_stock_range,
     get_all_incoming_stock_summary_range: get_all_incoming_stock_summary_range,
 
     sell_stock: insert_outgoing_stocks,
