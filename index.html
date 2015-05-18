@@ -4,7 +4,7 @@
         <title>The Golden Nuts</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="/res/goldennuts.css" />
-        <script src="/res/goldennuts.js"></script>        
+        <script src="/res/goldennuts.js"></script>
 
         <!--link for messagebox http://t4t5.github.io/sweetalert/ -->
         <script src="/res/dist/sweetalert.min.js"></script>
@@ -182,7 +182,7 @@
                 document.getElementById('data').innerHTML = "<a href=\"/\">Home</a>";
                 db_list_currents_stocks_ui(false, function (error, table) {
                     table = "<label> <b>Closing Stocks</b> (item not shown here are empty)</label>" + table;
-                    set_data_section(document.getElementById('data').innerHTML + "<br/>" + table);                    
+                    set_data_section(document.getElementById('data').innerHTML + "<br/>" + table);
                 });
 
                 setTimeout(function () {
@@ -258,9 +258,9 @@
                         sweetAlert("", "Cancelled Adding New Item '" + name + "'", "warning");
                         return;
                     }
-                    
+
                     db_add_new_item(name, function (error, msg) {
-                        if (error === false) {                            
+                        if (error === false) {
                             set_data_section("");
                             sweetAlert("", "Item '" + name + "' added to database", "success");
                         } else {
@@ -278,11 +278,11 @@
                 <h1> Add New Item </h1>
                 <input type="text" name='name' pattern=".{5,}"
                        required title="5 letters minimum" id='tags'
-                       placeholder="Item Name" 
+                       placeholder="Item Name"
                        tabindex="1" />
                 <br /><br />
-                <input type="submit" 
-                       value="Submit" 
+                <input type="submit"
+                       value="Submit"
                        tabindex="2" />
             </form>
         </div>
@@ -321,7 +321,7 @@
                     total_quantity += item.quantity;
                     total_cost += item.price;
                     total_items++;
-                }           
+                }
                 confirmAction(
                     "Total " + total_quantity + " KG, " + total_cost + " Rs",
                     "Summary for " + total_items + " Items",
@@ -334,7 +334,7 @@
                                     sweetAlert("", "Added all items to database");
                                     set_data_section("");
                                 }
-                            });                                      
+                            });
                         }
                         else {
                             sweetAlert("Cancelled adding stock", "");
@@ -358,7 +358,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <select id="incoming_item_options" 
+                            <select id="incoming_item_options"
                                     tabindex="1"
                                     required>
 
@@ -382,7 +382,7 @@
                     </tr>
                 </table> <br />
                 <input type="button" value="Add Another Item" onclick="Incoming_AddItem()" tabindex="4"/>
-                <input type="button" value="Delete Last Item" onclick="Incoming_DeleteLastItem()" />                
+                <input type="button" value="Delete Last Item" onclick="Incoming_DeleteLastItem()" />
                 <input type="submit" value="Submit" />
             </form>
         </div>
@@ -396,7 +396,7 @@
                 var row = table.insertRow(table.rows.length);
                 row.innerHTML = table.rows[1].innerHTML;
                 row.cells[1].childNodes[1].max = 0;
-                row.cells[1].childNodes[1].min = 0;                
+                row.cells[1].childNodes[1].min = 0;
                 row.cells[3].childNodes[1].innerHTML = table.rows.length-1;
             }
 
@@ -414,8 +414,8 @@
 
                 obj.size = table.rows.length - 1;
                 obj.reason = document.forms['outgoing_stock']['outgoing_reason'].value;
-                obj.option = document.forms['outgoing_stock']['outgoing_option'].value;                
-                
+                obj.option = document.forms['outgoing_stock']['outgoing_option'].value;
+
                 obj.item = [];
                 for (var i = 1; i < table.rows.length; i++) {
                     var item = {};
@@ -454,7 +454,7 @@
             function update_table_quantity(item_name) {
                 var table = document.getElementById("outgoing_table");
                 var index = 0;
-                for (var i = 1; i < table.rows.length; i++) {                    
+                for (var i = 1; i < table.rows.length; i++) {
                     var name = table.rows[i].cells[0].childNodes[1].value;
                     if (name == item_name) {
                         if (index) {
@@ -466,7 +466,7 @@
                             if (err) {
                                 sweetAlert("", "Unable to get stocks of " + value, "error");
                                 return;
-                            }                            
+                            }
                             table.rows[index].cells[1].childNodes[1].max = (rows[0].quantity / 1000);
                             if (rows[0].quantity > 1000) {
                                 weight = (rows[0].quantity / 1000) + " Kgs";
@@ -475,7 +475,7 @@
                             }
                             document.getElementById('stock_level_label').innerHTML =
                                 "Available stocks for " + name + " " + weight;
-                        });                        
+                        });
                     }
                 }
             }
@@ -484,12 +484,12 @@
             <form name='outgoing_stock'
                   action='javascript:outgoing_stock_list_action()'
                   onsubmit='return validate_outgoing_stock_list()'>
-                <label id="stock_level_label" 
+                <label id="stock_level_label"
                        for="qunatity"
                        style="color:red;">
 
                 </label>
-                <select name="outgoing_option" 
+                <select name="outgoing_option"
                         tabindex="4"
                         required>
                     <option disabled selected> -- select outgoing reason -- </option>
@@ -501,7 +501,7 @@
                 </select>
                 <input type="text" name="outgoing_reason" placeholder="Enter BillNumber/Hotel/Distributor" required />
                 <table class='TColor' id="outgoing_table">
-                    <tr>                        
+                    <tr>
                         <th>Item Name</th>
                         <th>Quantity</th>
                         <th>Price</th>
@@ -531,7 +531,7 @@
                 <input type="button" value="Add Another Item" onclick="AddItem()" tabindex="4" />
                 <input type="button" value="Delete Last Item" onclick="DeleteLastItem()" />
                 <input type="submit" value="Submit" />
-            </form>            
+            </form>
         </div>
     </div>
 
@@ -557,7 +557,7 @@
                            placeholder="Enter gms to convert to kg"
                            onchange="update_results(this.value)"
                            step="1"
-                           min="0" />                    
+                           min="0" />
                 </td>
                 <td>
                     <label id="output" style="color:blue"></label>
