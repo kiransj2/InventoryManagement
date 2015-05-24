@@ -17,10 +17,17 @@ if(!db.db_init(false)) {
 
 /* Set the user name and password*/
 var basicAuth = require('basic-auth-connect');
-app.use(basicAuth('goldennuts', 'Temple'));
+app.use(basicAuth(function (user, password) {
+    switch (user) {
+        case 'root': return (password == 'root') ? true : false;
+        case 'goldennuts': return (password == 'Temple') ? true : false;
+    }
+    return false;    
+}));
 
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
+    //console.log("username: %s", req.user);
     res.sendFile(__dirname + '/index.html');
 });
 
@@ -76,6 +83,18 @@ app.get('/api/get_all_incoming_stock_summary_range', function (req, res) {
 
 app.get('/api/get_incoming_stocks_range', function (req, res) {
     console.log("get_incoming_stocks_range --> ", req.query.range);
+    switch (req.query.range) {
+        case 'month':
+        case 'year':
+            if (req.user != 'root') {
+                res.writeHead(401, { 'Content-Type': 'text/plain' });
+                res.end("Need admin access.");
+                return;
+            }
+            break;
+        default:
+            break;
+    }
     db_logic.get_all_incoming_stock_range(req.query.range, function (error, json) {
         if (error) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -106,6 +125,11 @@ app.get('/api/get_outgoing_stocks_range', function (req, res) {
 
 app.get('/api/get_outgoing_stocks_summary', function (req, res) {
     console.log("get_outgoing_stocks_summary --> ", req.query.range);
+    if (req.user != 'root') {
+        res.writeHead(401, { 'Content-Type': 'text/plain' });
+        res.end("Need admin access.");
+        return;
+    }
     db_logic.get_outgoing_stocks_summary(req.query.range, function (error, json) {
         if (error) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });

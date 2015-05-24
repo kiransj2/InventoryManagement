@@ -59,20 +59,20 @@
             function list_incoming_stocks(when) {
                 var t = "<a onclick=\"list_incoming_stocks('today')\" href='javascript:void(0);'> Today's Transactions </a> &nbsp; ";
                 t += "<a onclick=\"list_incoming_stocks('week')\" href='javascript:void(0);'> Last Weeks Transactions  </a> &nbsp; "
-                t += "<a onclick=\"list_incoming_stocks('month')\" href='javascript:void(0);''> Last Month Transactions </a> &nbsp;"
-                t += "<a onclick=\"list_incoming_stocks('year')\" href='javascript:void(0);''> Last Year Transactions </a> &nbsp;"
+                t += "<a onclick=\"list_incoming_stocks('month')\" href='javascript:void(0);''><font color='FF0000'> Last Month Transactions</font> </a> &nbsp;"
+                t += "<a onclick=\"list_incoming_stocks('year')\" href='javascript:void(0);''><font color='FF0000'> Last Year Transactions </font></a> &nbsp;"
 
                if (when == null) {
                     var d = new Date();
                     var date = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
                     db_get_incoming_stocks_ui(date, function (error, table) {
+                        set_header_section("Incoming Stocks Today's Summary");
                         if (error) {
                             sweetAlert("", table, "error");
-                            set_data_section(table);
+                            set_data_section(t + "<br/><br/>" + table);
                             return;
                         }
-                        set_data_section(t + "<br/><br/>" + table);
-                        set_header_section("Incoming Stocks Today's Summary");
+                        set_data_section(t + "<br/><br/>" + table);                        
                     });
                } else {
                    var str = "";
@@ -84,25 +84,24 @@
                        default: str = 'unknown'; break;
                    }
                    db_get_incoming_stocks_range(when, function (err, table) {
+                       set_header_section("Incoming Stocks (" + str + ")");
                        if (err) {
-                           sweetAlert("", table, "error");
-                           set_data_section(table);
+                           sweetAlert(table, "", "error");
+                           set_data_section(t + "<br/><br/>" + table);
                            return;
                         }
-                        set_data_section(t + "<br/><br/>" + table);
-                        set_header_section("Incoming Stocks (" + str + ")");
+                        set_data_section(t + "<br/><br/>" + table);                        
                     });
                 }
             }
 
             var t = "<a onclick=\"list_outgoing_stocks('today')\" href='javascript:void(0);'> Today's Transactions </a> &nbsp; ";
-            t += "<a onclick=\"list_outgoing_stocks('week')\" href='javascript:void(0);'> Last Week's Transactions  </a> &nbsp; "
-            t += "<a onclick=\"list_outgoing_stocks('month')\" href='javascript:void(0);''> Last Month Transactions </a> &nbsp;"
-            t += "<a onclick=\"list_outgoing_stocks('year')\" href='javascript:void(0);''> Last Year Transactions </a> &nbsp; <br/>"
+            t += "<a onclick=\"list_outgoing_stocks('week')\" href='javascript:void(0);'> Last Week's Transactions  </a> &nbsp; ";
+            t += "<a onclick=\"list_outgoing_stocks('month')\" href='javascript:void(0);''> Last Month Transactions </a> &nbsp; <br/>";
 
-            t += "<a onclick=\"list_outgoing_stocks_summary('week')\" href='javascript:void(0);'> Last Week's Summary  </a> &nbsp; "
-            t += "<a onclick=\"list_outgoing_stocks_summary('month')\" href='javascript:void(0);''> Last Month Summary </a> &nbsp;"
-            t += "<a onclick=\"list_outgoing_stocks_summary('year')\" href='javascript:void(0);''> Last Year Summary </a> &nbsp;"
+            t += "<a onclick=\"list_outgoing_stocks_summary('week')\" href='javascript:void(0);'> <font color='FF0000'>Last Week's Summary </font> </a> &nbsp; ";
+            t += "<a onclick=\"list_outgoing_stocks_summary('month')\" href='javascript:void(0);''> <font color='FF0000'>Last Month Summary </font></a> &nbsp;";
+            t += "<a onclick=\"list_outgoing_stocks_summary('year')\" href='javascript:void(0);''> <font color='FF0000'>Last Year Summary</font> </a> &nbsp;";
 
             function list_outgoing_stocks_summary(when) {
                 
@@ -115,13 +114,13 @@
                 }
                 
                 db_get_outgoing_summary(when, function (err, table) {
+                    set_header_section("Sales Summary (" + str + ")");
                     if (err) {
-                        sweetAlert("", table, "error");
-                        set_data_section(table);
+                        sweetAlert(table, "", "error");
+                        set_data_section(t + "<br/><br/>" + table);
                         return;
                     }
-                    set_data_section(t + "<br/><br/>" + table);
-                    set_header_section("Sales Summary (" + str + ")");
+                    set_data_section(t + "<br/><br/>" + table);                    
                 });
                 return;
             }
@@ -151,8 +150,8 @@
                     }
                     db_get_outgoing_stocks_range(when, function (err, table) {
                         if (err) {
-                            sweetAlert("", table, "error");
-                            set_data_section(table);
+                            sweetAlert(table, "", "error");
+                            set_data_section(t + "<br/><br/>" + table);
                             return;
                         }
                         set_data_section(t + "<br/><br/>" + table);

@@ -6,8 +6,9 @@ function ajaxRequest(url, callback) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             callback(false, xmlhttp.responseText);
-        }
-        else if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
+        } else if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
+            callback(true, xmlhttp.responseText);
+        } else if (xmlhttp.readyState == 4 && xmlhttp.status == 401) {
             callback(true, xmlhttp.responseText);
         }
         return;
@@ -166,7 +167,7 @@ function db_get_incoming_stocks_range(range, callback) {
 
     ajaxRequest("/api/get_incoming_stocks_range?range=" + range, function (error, data) {
         if (error == true) {
-            callback(true, "Unable to get incoming stocks for 7 days");
+            callback(true, data);
             return;
         }
 
@@ -312,7 +313,7 @@ function db_get_outgoing_summary(range, callback) {
     
     ajaxRequest("/api/get_outgoing_stocks_summary?range=" + range, function (error, data) {
         if (error == true) {
-            callback(false, "Unable to get outgoing stocks summar for last %s", range);
+            callback(true, data);
             return;
         }
         
