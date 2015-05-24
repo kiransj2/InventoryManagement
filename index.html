@@ -310,7 +310,7 @@
                 var total_quantity = 0, total_cost = 0, total_items = 0;
                 var table = document.getElementById("incoming_table");
 
-                obj.size = table.rows.length - 2;
+                obj.size = table.rows.length - 1;
                 obj.item = [];
                 for (var i = 1; i < table.rows.length; i++) {
                     var item = {};
@@ -323,7 +323,7 @@
                     total_items++;
                 }
                 confirmAction(
-                    "Total " + total_quantity + " KG, " + total_cost + " Rs",
+                    "Total " + total_quantity.toFixed(3) + " KG, " + total_cost + " Rs",
                     "Summary for " + total_items + " Items",
                     function (confirmed) {
                         if (confirmed) {
@@ -428,7 +428,7 @@
                     total_items++;
                 }
                 confirmAction(
-                    "Total " + total_quantity + " KG, " + total_cost + " Rs",
+                    "Total " + total_quantity.toFixed(3) + " KG, " + total_cost + " Rs",
                     "Summary for " + total_items + " Items, for " + obj.option + "("+obj.reason +")",
                     function (confirmed) {
                         if (confirmed) {
