@@ -271,7 +271,7 @@ function db_get_outgoing_stocks_range(range, callback) {
 
     ajaxRequest("/api/get_outgoing_stocks_range?range=" + range, function (error, data) {
         if (error == true) {
-            callback(false, "Unable to get outgoing stocks for %s days", range);
+            callback(false, "Unable to get outgoing stocks range for last %s ", range);
             return;
         }
 
@@ -281,6 +281,46 @@ function db_get_outgoing_stocks_range(range, callback) {
     });
 }
 
+function get_outgoing_stocks_summary_from_json_ui(rows) {
+    var total_cost = 0, total_stocks = 0;
+    for (var i = 0; i < rows.length; i++) {
+        total_cost += rows[i].price;
+        total_stocks += rows[i].quantity;
+    }
+    total_stocks = total_stocks / 1000;
+    
+    var table = "<table class='TColor'>"
+    table += "<tr><th>Name ("+rows.length+" items)</th><th>Quantity(" + total_stocks + " Kg)</th>";
+    table += "<th>Paid(Rs " + total_cost + ")</th></tr>";
+    
+    for (var i = 0; i < rows.length; i++) {
+        var weight = 0;
+        if (rows[i].quantity < 1000) {
+            weight = "" + rows[i].quantity + " gms";
+        } else {
+            weight = "" + rows[i].quantity / 1000 + " kgs";
+        }
+        table += "<tr><td>" + rows[i].name + "</td><td>" + weight + "</td><td>";
+        table += rows[i].price + "</td></tr>";
+    }
+    
+    table += "</table>";
+    return table;
+}
+
+function db_get_outgoing_summary(range, callback) {
+    
+    ajaxRequest("/api/get_outgoing_stocks_summary?range=" + range, function (error, data) {
+        if (error == true) {
+            callback(false, "Unable to get outgoing stocks summar for last %s", range);
+            return;
+        }
+        
+        var obj = JSON.parse(data);
+        var d = get_outgoing_stocks_summary_from_json_ui(obj);
+        callback(false, d);
+    });
+}
 
 
 function db_list_current_stocks(callback) {

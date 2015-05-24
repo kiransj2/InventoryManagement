@@ -417,6 +417,8 @@ function get_all_incoming_stock_range(when, callback) {
         date = moment().subtract(30, 'days');
     else if(when == 'today')
         date = moment().subtract(1, 'days');
+    else if (when == 'year')
+        date = moment().subtract(365, 'days');
 
     var stmt = format("SELECT stocks.transaction_id, stocks.item_id, items.name, stocks.quantity, stocks.price, stocks.dt, stocks.tm " +
                        "from incoming_stocks as stocks " +
@@ -517,6 +519,8 @@ function get_all_outgoing_stock_range(when, callback) {
         date = moment().subtract(30, 'days');
     else if (when == 'today')
         date = moment().subtract(1, 'days');
+    else if (when == 'year')
+        date = moment().subtract(365, 'days');
 
     var stmt = format("SELECT stocks.transaction_id, stocks.transaction_type, items.name, stocks.quantity, stocks.reason, stocks.price, stocks.dt, stocks.tm " +
                        "FROM outgoing_stocks AS stocks " +
@@ -537,6 +541,34 @@ function get_all_outgoing_stock_range(when, callback) {
         return;
     });
     return;
+}
+
+function get_outgoing_stocks_summary(when, callback) {
+    var date;
+    if (when == 'week')
+        date = moment().subtract(7, 'days');
+    else if (when == 'month')
+        date = moment().subtract(30, 'days');    
+    else if (when == 'year')
+        date = moment().subtract(365, 'days');    
+
+    var stmt = format("SELECT items.name, SUM(stocks.quantity) as quantity, SUM(stocks.price) as price " +
+                      "FROM outgoing_stocks AS stocks " +
+                      "JOIN items AS items " +
+                      "ON items.item_id = stocks.item_id " +
+                      "where stocks.dt > date('%s') " +
+                      "group by items.name", date.format('YYYY-MM-DD'));
+    db.db_execute_query(stmt, function (err, rows) {
+        if (err) {
+            console.error("Query operation to fetch outgoing_stocks_summary failed %s", err);
+            callback(true, "Query operation to fetch incoming_stocks_summary failed");
+            return;
+        }
+        log(format("outgoing_stocks_summary rows.length = %d", rows.length));
+        callback(false, rows);
+        return;
+    });
+    log(stmt);
 }
 
 function get_current_stocks(callback) {
@@ -595,6 +627,7 @@ module.exports = {
     sell_stock: insert_outgoing_stocks,
     get_all_outgoing_stock_on: get_all_outgoing_stock_on,
     get_all_outgoing_stock_range: get_all_outgoing_stock_range,
+    get_outgoing_stocks_summary: get_outgoing_stocks_summary,
 
     current_stocks: get_current_stocks,
     get_stock_of: get_stocks_of
