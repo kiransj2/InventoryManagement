@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI Datepicker - Default functionality</title>
+  <link rel="stylesheet" href="/res/jquery/jquery-ui.css">
+  <script src="/res/jquery/jquery-1.10.2.js"></script>
+  <script src="/res/jquery/jquery-ui.js"></script>
+  
+  <script>
+  $(function() {
+    $( "#datepicker" ).datepicker();	
+  });
+  function updateDate() {	
+	alert($( datepicker ).datepicker( { dateFormat: 'dd-mm-yyyy' } ).val());
+	$( "#datepicker" ).datepicker("show");	
+  }  
+  </script>
+</head>
+<body>
+ 
+<p>Date: <input type="text" id="datepicker" onchange="updateDate()"></p>
+
+ 
+</body>
+</html>
