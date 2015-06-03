@@ -62,13 +62,14 @@ function insert_items_check_itemid() {
         { "name": "cashew-JH",    "err_status": true,  "id":4,  "msg":"failed to insert cashew-JH" },
         { "name": "pepper",       "err_status": true,  "id":5,  "msg":"failed to insert pepper" },
         { "name": "pepper",       "err_status": false, "id":5,  "msg":"Insert should fail as pepper is added again" },
+        { "name": "Pepper",       "err_status": false, "id":5,  "msg":"Insert should fail as Pepper is added again with different case" },
         { "name": "cashew round", "err_status": false, "id":-1, "msg":"Inserting 'cashew round' should fail due to space in name"},
         { "name": "cashew.round", "err_status": false, "id":-1, "msg":"Inserting 'cashew.round' should fail due to '.' in name"},
         { "name": "cashew#round", "err_status": false, "id":-1, "msg":"Inserting 'cashew#round' should fail due to '#' in name"},
         { "name": "cashew$round", "err_status": false, "id":-1, "msg":"Inserting 'cashew$round' should fail due to '$' in name"},
         { "name": "cashew!round", "err_status": false, "id":-1, "msg":"Inserting 'cashew!round' should fail due to '!' in name"},
         { "name": "cas",          "err_status": false, "id":-1, "msg":"Inserting 'cas' should fail as name has only 3 letters"},
-        { "name": "cashew-round", "err_status": false, "id":3,  "msg":"Insert should fail as cashew-round exists already" },
+        { "name": "CASHEW-round", "err_status": false, "id":3,  "msg":"Insert should fail as cashew-round exists already" },
         { "name": "casa",         "err_status": false, "id":-1, "msg":"Inserting 'casa' should fail as name has only 4 letters"}
     ];
     var num_items = -1;
@@ -108,10 +109,40 @@ function insert_items_check_itemid() {
     return;
 }
 
+function get_item_list() {
+    db.item_list(function(err, rows) {
+        assert(err, "Getting item list should not fail");
+        assert(rows.length != 5, "Number of elements should be 5 insted it is " + rows.length);
+        if(typeof rows[0].name === 'undefined'    ||
+           typeof rows[0].item_id === 'undefined' ||
+           typeof rows[0].dt === 'undefined'      ||
+           typeof rows[0].tm === 'undefined') {
+            assert(1, "Coloumns missing in item_list"); 
+        }
+        eventEmitter.emit("next_test");
+        return;
+    });
+    return;
+}
+
+function add_stocks_to_db() {
+    var obj = { };
+    obj.name = "cashew";
+    obj.quantity = 1500;
+    obj.price = 730;
+    db.new_stock(obj, function(err, msg) {
+        assert(err == true, "failed to insert stocks for cashew"); 
+        eventEmitter.emit("next_test");
+    });
+
+}
+
 function main() {
     var tests = [
-                 create_database_build_tables,
-                 insert_items_check_itemid 
+                    create_database_build_tables,
+                    insert_items_check_itemid,
+                    get_item_list,
+                    add_stocks_to_db
                 ];
     var count = -1;
 

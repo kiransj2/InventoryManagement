@@ -127,7 +127,7 @@ function insert_item(name, callback) {
         });
         return;
     } else {
-        var stmt = format("INSERT INTO ITEMS(name, dt, tm) VALUES('%s','%s', '%s');", name, date_now(), time_now());
+        var stmt = format("INSERT INTO ITEMS(name, dt, tm) VALUES('%s','%s', '%s');", name.toLowerCase(), date_now(), time_now());
         db.execute_query(stmt, function (err, rows) {
             if (err) {
                 ERROR("Insert operation for name '" + name + "' failed due to " + err);
@@ -143,7 +143,7 @@ function insert_item(name, callback) {
 
 // Get Item id of an item
 function get_item_id(name, callback) {
-    var stmt = format("SELECT item_id FROM ITEMS WHERE name = '%s'", name);
+    var stmt = format("SELECT item_id FROM ITEMS WHERE name = '%s'", name.toLowerCase());
     db.execute_query(stmt, function (err, rows) {
         if (err) {
             ERROR("Query operation for item_id failed with error '%s'", err); 
@@ -167,7 +167,7 @@ function get_item_id(name, callback) {
 // Gets the list of item names
 function get_item_list(callback) {
     var stmt = format("SELECT item_id, name, dt, tm FROM ITEMS ORDER BY LOWER(name)");
-    db.db_execute_query(stmt, function(err, rows) {
+    db.execute_query(stmt, function(err, rows) {
         if(err) {
             ERROR("Item list fetch failed with error '%s'", err);
             callback(true, err);
@@ -179,6 +179,77 @@ function get_item_list(callback) {
     return;
 }
 
+// Usage 
+// obj is json with the following variables.
+//      name     => name of the item to which stocks should be added
+//      quantity => quantity of the stocks in gms
+//      price    => price paid for the Stocks
+//      date     => date of the incoming stocks. [Default value is today's date]
+//      time     => time of the incoming stocks. [Default value is current time]
+// callback takes one arguments which tells wheather there is an error or not
+
+function add_incoming_stock(obj, callback) {
+    if(typeof obj.name === 'undefined'     || 
+       typeof obj.quantity === 'undefined' || 
+       typeof obj.price === 'undefined'    ||
+       typeof obj.quantity !== 'number'    || 
+       typeof obj.price !== 'number') 
+    {
+        ERROR("required input doesnt exists to add stocks to db");
+        process.nextTick(function() {
+            callback(true, "malformed request");
+            return;
+        });
+        return;
+    }
+
+
+    if(typeof obj.date === 'undefined') {
+        obj.date = date_now();
+    }
+
+    if(typeof obj.time === 'undefined') {
+        obj.time = time_now();
+    }
+
+    if(!moment(obj.date, "YYYY-MM-DD").isValid() || 
+       !moment(obj.time, "HH-mm-ss").isValid()) 
+    {
+        ERROR("date and time not in required format");
+        process.nextTick(function() {
+            callback(true, "malformed request");
+            return;
+        });
+        return;
+    }
+
+    get_item_id(obj.name, function(err, item_id) {
+        if(err) {
+            ERROR("item name '%s' does not exists in DB", obj.name);
+            callback(true, err);
+            return;
+        }
+        var stmt = format("INSERT INTO incoming_stocks (item_id, quantity, price, dt, tm) values(%d, %d, %d, '%s', '%s');",
+                          item_id,
+                          obj.quantity,
+                          obj.price,
+                          obj.date,
+                          obj.time);
+        db.execute_query(stmt, function(err, rows) {
+            if(err) {
+                ERROR("Inserting stocks for %s failed due to '%s'", obj.name, err);
+                callback(true, err);
+                return;
+            }
+            var msg = format("Added %d gms of '%s' to db", obj.quantity, obj.name);
+            INFO(msg);
+            callback(false, msg);
+            return;
+        });
+        return;
+    });
+}
+
 module.exports = {
     open: db.open,
     status: db.status,
@@ -187,5 +258,7 @@ module.exports = {
 
     new_item: insert_item,
     item_id: get_item_id,
-    item_list: get_item_list
+    item_list: get_item_list,
+
+    new_stock: add_incoming_stock
 };
